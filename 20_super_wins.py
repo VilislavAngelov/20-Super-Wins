@@ -40,15 +40,54 @@ def spin(balance):
             screen.append(reel)
             reel = []
 
+        """{screen[0][0]} {screen[1][0]} {screen[2][0]} {screen[3][0]} {screen[4][0]}
+            {screen[0][1]} {screen[1][1]} {screen[2][1]} {screen[3][1]} {screen[4][1]}
+            {screen[0][2]} {screen[1][2]} {screen[2][2]} {screen[3][2]} {screen[4][2]}"""
+
+
         line1 = [screen[0][0], screen[1][0], screen[2][0], screen[3][0], screen[4][0]]
         line2 = [screen[0][1], screen[1][1], screen[2][1], screen[3][1], screen[4][1]]
         line3 = [screen[0][2], screen[1][2], screen[2][2], screen[3][2], screen[4][2]]
+        line4 = [screen[0][0], screen[1][1], screen[2][2], screen[3][1], screen[4][0]]
+        line5 = [screen[0][2], screen[1][1], screen[2][0], screen[3][1], screen[4][2]]
+        line6 = [screen[0][0], screen[1][0], screen[2][1], screen[3][2], screen[4][2]]
+        line7 = [screen[0][2], screen[1][2], screen[2][1], screen[3][0], screen[4][0]]
+        line8 = [screen[0][1], screen[1][2], screen[2][2], screen[3][2], screen[4][1]]
+        line9 = [screen[0][1], screen[1][0], screen[2][0], screen[3][0], screen[4][1]]
+        line10 = [screen[0][0], screen[1][1], screen[2][1], screen[3][1], screen[4][0]]
+        line11 = [screen[0][2], screen[1][1], screen[2][1], screen[3][1], screen[4][2]]
+        line12 = [screen[0][1], screen[1][2], screen[2][1], screen[3][0], screen[4][1]]
+        line13 = [screen[0][1], screen[1][0], screen[2][1], screen[3][2], screen[4][1]]
+        line14 = [screen[0][0], screen[1][1], screen[2][0], screen[3][1], screen[4][0]]
+        line15 = [screen[0][2], screen[1][1], screen[2][2], screen[3][1], screen[4][2]]
+        line16 = [screen[0][1], screen[1][1], screen[2][2], screen[3][1], screen[4][1]]
+        line17 = [screen[0][1], screen[1][1], screen[2][0], screen[3][1], screen[4][1]]
+        line18 = [screen[0][0], screen[1][2], screen[2][0], screen[3][2], screen[4][0]]
+        line19 = [screen[0][2], screen[1][0], screen[2][2], screen[3][0], screen[4][2]]
+        line20 = [screen[0][1], screen[1][0], screen[2][2], screen[3][0], screen[4][1]]
 
         lines = []
 
         lines.append(line1)
         lines.append(line2)
         lines.append(line3)
+        lines.append(line4)
+        lines.append(line5)
+        lines.append(line6)
+        lines.append(line7)
+        lines.append(line8)
+        lines.append(line9)
+        lines.append(line10)
+        lines.append(line11)
+        lines.append(line12)
+        lines.append(line13)
+        lines.append(line14)
+        lines.append(line15)
+        lines.append(line16)
+        lines.append(line17)
+        lines.append(line18)
+        lines.append(line19)
+        lines.append(line20)
 
         print_screen(screen)
 
