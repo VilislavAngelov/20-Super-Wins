@@ -12,16 +12,29 @@ The project showcases my learning experience, demonstrates iterative development
 
 **Final Product:** GUI-based 20-line slot game with 5 reels and 3 rows
 
+## Backlog
+    [ ] Break the project into smaller tasks.
+    [ ] Make the balance updates after each spin.
+    [ ] Make the basic 1 line, 3 reel terminal version.
+    [ ] Implement 3 rows, 5 reels and 20 win lines.
+    [ ] Make the joker a wild card.
+    [ ] Make the GUI.
+
 ## Stage 1 - Terminal 
     
 
-### I decided first to make the slot as straigghtforward as possible and then upgrade on it.
+**I decided first to make the slot as straigghtforward as possible and then upgrade on it.**
 
 
 ![](https://github.com/VilislavAngelov/20-Super-Wins/blob/20-super-wins/assets/Terminal%20DEMO.gif)
 
-The current version features:
+## The current version accomplishes:
 
-    - 1 Row and 3 Reels
-    - Only 1 line where all symbols need to be the same to yield a winning.
-    - Balance updates every 
+    [X] Break the project into smaller tasks.
+    [X] Make the balance updates after each spin.
+    [X] Make the basic 1 line, 3 reel terminal version.
+
+## Next Version Should:
+
+    [ ] Implement 3 rows, 5 reels and 20 win lines.
+    [ ] Make the joker a wild card.
