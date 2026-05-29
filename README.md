@@ -23,18 +23,34 @@ The project showcases my learning experience, demonstrates iterative development
 ## Stage 1 - Terminal 
     
 
-**I decided first to make the slot as straigghtforward as possible and then upgrade on it.**
+I decided to first make the slot as straightforward as possible and then upgrade on it.
+Broke the project into smaller tasks like:
+
+    -How a slot machine works?
+    -How to display the reels?
+    -Check if you have enough money to spin?
+    -How to deduct spin from balance?
+    -How to add wins to balance etc?
+
+And started tackling them one by one
+
+You currently get $1000 to spin the machine.
+Before you spin the program checks if you have enough balance to make a bet.
+3 symbols get picked and put into the row using random.choice()
+If the row has 3 of the same symbols you win a variable prize based on the symbols you get.
+Prize gets added to balance and we wait for a new spin.
+Each spin is initiated on a key press of any kind, meaning you can play using the spacebar.
 
 
 ![](https://github.com/VilislavAngelov/20-Super-Wins/blob/20-super-wins/assets/Terminal%20DEMO.gif)
 
-## The current version accomplishes:
+### The current version accomplishes:
 
     [X] Break the project into smaller tasks.
     [X] Make the balance updates after each spin.
     [X] Make the basic 1 line, 3 reel terminal version.
 
-## Next Version Should:
+### Next Version Should:
 
     [ ] Implement 3 rows, 5 reels and 20 win lines.
     [ ] Make the joker a wild card.
