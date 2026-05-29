@@ -3,52 +3,65 @@ from tkinter import ttk
 import random
 
 
+def print_screen(screen):
+
+    on_screen = f"""{screen[0][0]} {screen[1][0]} {screen[2][0]} {screen[3][0]} {screen[4][0]}
+{screen[0][1]} {screen[1][1]} {screen[2][1]} {screen[3][1]} {screen[4][1]}
+{screen[0][2]} {screen[1][2]} {screen[2][2]} {screen[3][2]} {screen[4][2]}"""
+
+    print(on_screen)
+
 def spin(balance):
         symbols = ["🍒", "🍊", "🍉", "🍇", "👑", "🃏"]
-        row = []
+        reel = []
+        screen = []
         
-        #Making the most basic version
-        for i in range(3):
-            row.append(random.choice(symbols))
+        for col in range(5):
+            for i in range(3):
+                reel.append(random.choice(symbols))
+            screen.append(reel)
+            reel = []
 
-        if row == ["🍒", "🍒","🍒"]:
-            print(row)
+        
+
+        if reel == ["🍒", "🍒","🍒"]:
+            print_screen(screen)
             print("You Win 30")
             balance += 30
             print(f"Balance ${balance}")
             return balance
-        elif row == ["🍊", "🍊","🍊"]:
-            print(row)
+        elif reel == ["🍊", "🍊","🍊"]:
+            print_screen(screen)
             print("You Win 40")
             balance += 40
             print(f"Balance ${balance}")
             return balance
-        elif row == ["🍉", "🍉","🍉"]:
-            print(row)
+        elif reel == ["🍉", "🍉","🍉"]:
+            print_screen(screen)
             print("You Win 80")
             balance += 80
             print(f"Balance ${balance}")
             return balance
-        elif row == ["🍇", "🍇","🍇"]:
-            print(row)
+        elif reel == ["🍇", "🍇","🍇"]:
+            print_screen(screen)
             print("You Win 160")
             balance += 160
             print(f"Balance ${balance}")
             return balance
-        elif row == ["👑", "👑","👑"]:
-            print(row)
+        elif reel == ["👑", "👑","👑"]:
+            print_screen(screen)
             print("You Win 320")
             balance += 320
             print(f"Balance ${balance}")
             return balance
-        elif row == ["🃏", "🃏","🃏"]:
-            print(row)
+        elif reel == ["🃏", "🃏","🃏"]:
+            print_screen(screen)
             print("You Win 1000")
             balance += 1000
             print(f"Balance ${balance}")
             return balance
         else: 
-            print(row) 
+            print_screen(screen)
             print()
             print(f"Balance ${balance}")
             return balance
@@ -99,7 +112,6 @@ root.mainloop()
 TASK LIST
 1. Break down the task to smaller tasks
     -How a slot machine works
-        I haven't found out this yet exactly
     -How to display the reels
     -Check if you have enough money to spin
     -How to deduct spin from balance
