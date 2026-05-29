@@ -16,5 +16,9 @@ The project showcases my learning experience, demonstrates iterative development
     
 
 ### Phase 1: Terminal Version (1×3)
-![Terminal version demo](assets/terminal-demo.gif)
-> *Initial prototype - Simple, functional, text-based*
+
+I decided first to make the slot as straigghtforward as possible and then upgrade on it.
+
+This is the first working version.
+
+![](https://github.com/VilislavAngelov/20-Super-Wins/blob/20-super-wins/assets/Terminal%20DEMO.gif)
