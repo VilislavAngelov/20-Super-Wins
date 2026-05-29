@@ -22,49 +22,47 @@ def spin(balance):
             screen.append(reel)
             reel = []
 
-        
+        line1 = [screen[0][0], screen[1][0], screen[2][0], screen[3][0], screen[4][0]]
+        line2 = [screen[0][1], screen[1][1], screen[2][1], screen[3][1], screen[4][1]]
+        line2 = [screen[0][2], screen[1][2], screen[2][2], screen[3][2], screen[4][2]]
 
-        if reel == ["🍒", "🍒","🍒"]:
-            print_screen(screen)
+        print_screen(screen)
+
+        if line1[0] == line1[1] == line1[2] and line1[0] == "🍒":
             print("You Win 30")
             balance += 30
             print(f"Balance ${balance}")
             return balance
-        elif reel == ["🍊", "🍊","🍊"]:
-            print_screen(screen)
+        elif line1[0] == line1[1] == line1[2] and line1[0] == "🍊":
             print("You Win 40")
             balance += 40
             print(f"Balance ${balance}")
             return balance
-        elif reel == ["🍉", "🍉","🍉"]:
-            print_screen(screen)
+        elif line1[0] == line1[1] == line1[2] and line1[0] == "🍉":
             print("You Win 80")
             balance += 80
             print(f"Balance ${balance}")
             return balance
-        elif reel == ["🍇", "🍇","🍇"]:
-            print_screen(screen)
+        elif line1[0] == line1[1] == line1[2] and line1[0] == "🍇":
             print("You Win 160")
             balance += 160
             print(f"Balance ${balance}")
             return balance
-        elif reel == ["👑", "👑","👑"]:
-            print_screen(screen)
+        elif line1[0] == line1[1] == line1[2] and line1[0] == "👑":
             print("You Win 320")
             balance += 320
             print(f"Balance ${balance}")
             return balance
-        elif reel == ["🃏", "🃏","🃏"]:
-            print_screen(screen)
+        elif line1[0] == line1[1] == line1[2] and line1[0] == "🃏":
             print("You Win 1000")
             balance += 1000
             print(f"Balance ${balance}")
             return balance
-        else: 
-            print_screen(screen)
+        else:
             print()
             print(f"Balance ${balance}")
             return balance
+
         #how to make the algorithm
         #how RNG works
  
