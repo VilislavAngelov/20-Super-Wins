@@ -16,35 +16,42 @@ def spin(balance):
             print("You Win 30")
             balance += 30
             print(f"Balance ${balance}")
+            return balance
         elif row == ["🍊", "🍊","🍊"]:
             print(row)
             print("You Win 40")
             balance += 40
             print(f"Balance ${balance}")
+            return balance
         elif row == ["🍉", "🍉","🍉"]:
             print(row)
             print("You Win 80")
             balance += 80
             print(f"Balance ${balance}")
+            return balance
         elif row == ["🍇", "🍇","🍇"]:
             print(row)
             print("You Win 160")
             balance += 160
             print(f"Balance ${balance}")
+            return balance
         elif row == ["👑", "👑","👑"]:
             print(row)
             print("You Win 320")
             balance += 320
             print(f"Balance ${balance}")
+            return balance
         elif row == ["🃏", "🃏","🃏"]:
             print(row)
             print("You Win 1000")
             balance += 1000
             print(f"Balance ${balance}")
+            return balance
         else: 
             print(row) 
             print()
             print(f"Balance ${balance}")
+            return balance
         #how to make the algorithm
         #how RNG works
  
@@ -62,14 +69,15 @@ def main():
     print(f"### Balance ${balance} ###")
     while balance > bet:
 
+
         balance -= bet
         input("")
-        spin(balance) 
+        balance = spin(balance) 
 
 
     
 
-main()
+main() 
 
 print("Insufficient Balance")
 

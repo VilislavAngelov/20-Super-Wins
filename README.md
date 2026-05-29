@@ -15,10 +15,13 @@ The project showcases my learning experience, demonstrates iterative development
 ## Stage 1 - Terminal 
     
 
-### Phase 1: Terminal Version (1×3)
+### I decided first to make the slot as straigghtforward as possible and then upgrade on it.
 
-I decided first to make the slot as straigghtforward as possible and then upgrade on it.
-
-This is the first working version.
 
 ![](https://github.com/VilislavAngelov/20-Super-Wins/blob/20-super-wins/assets/Terminal%20DEMO.gif)
+
+The current version features:
+
+    - 1 Row and 3 Reels
+    - Only 1 line where all symbols need to be the same to yield a winning.
+    - Balance updates every 
