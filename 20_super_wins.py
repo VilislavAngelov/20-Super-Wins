@@ -11,6 +11,24 @@ def print_screen(screen):
 
     print(on_screen)
 
+def check_lines(lines, balance):
+    for line in lines:
+        if line[0] == line[1] == line[2] == line[3] == line[4]:
+            print("You Win 120")
+            balance += 120
+        elif line[0] == line[1] == line[2] == line[3]:
+            print("You Win 60")
+            balance += 60
+        elif line[0] == line[1] == line[2]:
+            print("You Win 30")
+            balance += 30
+        else:
+            pass
+            
+    print()
+    print(f"Balance ${balance}")
+    return balance   
+
 def spin(balance):
         symbols = ["🍒", "🍊", "🍉", "🍇", "👑", "🃏"]
         reel = []
@@ -24,10 +42,22 @@ def spin(balance):
 
         line1 = [screen[0][0], screen[1][0], screen[2][0], screen[3][0], screen[4][0]]
         line2 = [screen[0][1], screen[1][1], screen[2][1], screen[3][1], screen[4][1]]
-        line2 = [screen[0][2], screen[1][2], screen[2][2], screen[3][2], screen[4][2]]
+        line3 = [screen[0][2], screen[1][2], screen[2][2], screen[3][2], screen[4][2]]
+
+        lines = []
+
+        lines.append(line1)
+        lines.append(line2)
+        lines.append(line3)
 
         print_screen(screen)
 
+        return check_lines(lines, balance)
+
+
+        
+
+"""
         if line1[0] == line1[1] == line1[2] and line1[0] == "🍒":
             print("You Win 30")
             balance += 30
@@ -65,7 +95,7 @@ def spin(balance):
 
         #how to make the algorithm
         #how RNG works
- 
+ """
 
 
 def main():
@@ -79,7 +109,6 @@ def main():
     print("##### Place Your Bet #####")
     print(f"### Balance ${balance} ###")
     while balance > bet:
-
 
         balance -= bet
         input("")
