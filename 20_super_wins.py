@@ -11,32 +11,49 @@ def print_screen(screen):
 
     print(on_screen)
 
-def check_lines(lines, balance):
+#if you hit 4 of a kind the game alo pays for the 3 in a kind within this line. This needs to be fixed
+
+def check_lines(lines, balance, symbols_multiplier):
+    winnings = 0
     for line in lines:
         if line[0] == line[1] == line[2] == line[3] == line[4]:
-            print("You Win 120")
-            balance += 120
+            multiplier = symbols_multiplier.get(line[0])
+            winnings += 100 * multiplier
+            continue
         elif line[0] == line[1] == line[2] == line[3]:
-            print("You Win 60")
-            balance += 60
+            multiplier = symbols_multiplier.get(line[0])
+            winnings += 30 * multiplier
+            continue
         elif line[0] == line[1] == line[2]:
-            print("You Win 30")
-            balance += 30
+            multiplier = symbols_multiplier.get(line[0])
+            winnings += 10 * multiplier
+            continue
         else:
             pass
-            
+
+    balance += winnings        
+    if winnings != 0: 
+        print(f"You Win ${winnings}")
+
     print()
     print(f"Balance ${balance}")
     return balance   
 
 def spin(balance):
-        symbols = ["🍒", "🍊", "🍉", "🍇", "👑", "🃏"]
+        symbols_multiplier = {
+            "🍒": 1,
+            "🍊": 2,
+            "🍉": 5,
+            "🍇": 10,
+            "👑": 20,
+            "🃏": 50
+            }
         reel = []
         screen = []
-        
+
         for col in range(5):
             for i in range(3):
-                reel.append(random.choice(symbols))
+                reel.append(random.choices(list(symbols_multiplier.keys()), weights = [10, 8, 6, 4, 2, 1], k = 1)[0])
             screen.append(reel)
             reel = []
 
@@ -91,7 +108,7 @@ def spin(balance):
 
         print_screen(screen)
 
-        return check_lines(lines, balance)
+        return check_lines(lines, balance, symbols_multiplier)
 
 
         
