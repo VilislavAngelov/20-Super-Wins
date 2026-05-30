@@ -2,6 +2,14 @@ from tkinter import *
 from tkinter import ttk
 import random
 
+symbols_multiplier = {
+            "🍒": 1,
+            "🍊": 2,
+            "🍉": 5,
+            "🍇": 10,
+            "👑": 20,
+            "🃏": 50
+            }
 
 def print_screen(screen):
 
@@ -13,7 +21,7 @@ def print_screen(screen):
 
 #if you hit 4 of a kind the game alo pays for the 3 in a kind within this line. This needs to be fixed
 
-def check_lines(lines, balance, symbols_multiplier):
+def check_lines(lines, balance):
     winnings = 0
     for line in lines:
         if line[0] == line[1] == line[2] == line[3] == line[4]:
@@ -40,14 +48,7 @@ def check_lines(lines, balance, symbols_multiplier):
     return balance   
 
 def spin(balance):
-        symbols_multiplier = {
-            "🍒": 1,
-            "🍊": 2,
-            "🍉": 5,
-            "🍇": 10,
-            "👑": 20,
-            "🃏": 50
-            }
+        
         reel = []
         screen = []
 
@@ -108,7 +109,7 @@ def spin(balance):
 
         print_screen(screen)
 
-        return check_lines(lines, balance, symbols_multiplier)
+        return check_lines(lines, balance)
 
 
         
