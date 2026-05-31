@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+
 import random
 
 symbols_multiplier = {
