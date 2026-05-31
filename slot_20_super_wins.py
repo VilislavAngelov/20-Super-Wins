@@ -11,6 +11,9 @@ symbols_multiplier = {
             "👑": 20,
             "🃏": 50
             }
+lines_payouts = {5 : 100,
+                4 : 30,
+                3 : 10}
 
 def print_screen(screen):
 
@@ -24,6 +27,20 @@ def print_screen(screen):
 
 def check_lines(lines, balance):
     winnings = 0
+
+    """ I feel like this way of checking is very amateurish 
+    and redundant so I'll try to describe it, break it into 
+    chucks and tackle them one by one.
+    
+    # I want to make the joker a "wild" symbol that replaces 
+    # any other symbol so for example "🍒🃏🍒🍒🍊" is a 4 of a kind 
+    # cherry line, because the joker replaces a cherry in that scenario 
+    # 
+    # I want to make the function more elegant because currently it's one thing pasted 3 times
+    # 
+    # I think I can use a loop and a counting system so you iterate trough the symbols of a line
+    # and you keep getting the same one or a joker then increase the count. """
+
     for line in lines:
         if line[0] == line[1] == line[2] == line[3] == line[4]:
             multiplier = symbols_multiplier.get(line[0])
@@ -38,7 +55,32 @@ def check_lines(lines, balance):
             winnings += 10 * multiplier
             continue
         else:
-            pass
+            pass        
+
+    """ New version """
+
+    def find_target_symbol(line):
+        for symbol in line:
+            if symbol != "🃏":
+                return symbol
+            
+        return "🃏"
+
+    for line in lines:
+        target = find_target_symbol(line)
+        
+        # Now count the matches (including jokers!)
+        matches = 0
+        for symbol in line:
+            if symbol == target or symbol == "🃏":
+                matches += 1
+            else:
+                break
+        
+        winnings += lines_payouts.get(matches) * symbols_multiplier.get(target)
+
+            
+    return balance + winnings
 
     balance += winnings        
     if winnings != 0: 
