@@ -27,9 +27,15 @@ def check_lines(lines):
 
         target = next((s for s in line if s != "🃏"), "🃏")
 
-        matches = sum(1 for s in line if s == target or s == "🃏") 
+        matches = 0
+        for s in line:
+            if s == target or s == "🃏":
+                matches += 1
+            else:
+                break
 
-        winnings += lines_payouts.get(matches, 0) * symbols_multiplier.get(target, 0)        
+        if matches >= 3:
+            winnings += lines_payouts.get(matches, 0) * symbols_multiplier.get(target, 0)       
 
     return winnings 
   
