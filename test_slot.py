@@ -1,5 +1,5 @@
 import pytest
-from slot_20_super_wins import check_lines
+from slot_20_super_wins import spin, check_lines
 from hypothesis import given, strategies as st
 
 allowed_symbols = ["🍒", "🍊", "🍉", "🍇", "👑", "🃏"]
@@ -75,3 +75,23 @@ def test_check_wins(lines, balance, expected_balance):
     winnings = check_lines(lines)
     actual_balance = balance + winnings
     assert actual_balance == expected_balance
+
+
+def test_rtp():
+    num_spins = 100000 
+    total_bets = 0
+    total_wins = 0
+    bet_size = 10
+
+    for i in range(num_spins):
+
+        total_bets += bet_size
+
+        _, winnings = spin(0)
+
+        total_wins += winnings
+
+    rtp_estimate = (total_wins / total_bets) * 100
+    print(f"\nEstimated RTP over {num_spins} spins: {rtp_estimate:.2f}%")
+
+    assert 94.0 <= rtp_estimate <= 98.0

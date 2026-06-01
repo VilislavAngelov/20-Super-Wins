@@ -74,9 +74,7 @@ def spin(balance):
             [screen[0][1], screen[1][0], screen[2][2], screen[3][0], screen[4][1]]
         ]
 
-        print_screen(screen)
-
-        return check_lines(lines)
+        return screen, check_lines(lines)
 
 
 def main():
@@ -94,8 +92,10 @@ def main():
         input("")
         balance -= bet
         
-        winnings = spin(balance)
+        screen, winnings = spin(balance)
         balance += winnings  
+
+        print_screen(screen)
 
         if winnings != 0: 
             print(f"You Win ${winnings}")
