@@ -11,7 +11,7 @@ symbols_multiplier = {
             }
 
 SCATTER_SYMBOL = "⭐"
-SCATTER_PAYOUT = 100
+SCATTER_PAYOUT = 150
 
 def print_screen(screen):
 
