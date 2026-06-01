@@ -2,11 +2,11 @@ import random
 
 symbols_multiplier = {
             "🍒": 1,
-            "🍊": 2,
-            "🍉": 5,
-            "🍇": 10,
-            "👑": 20,
-            "🃏": 50
+            "🍊": 1,
+            "🍉": 2,
+            "🍇": 2,
+            "👑": 3,
+            "🃏": 10
             }
 
 def print_screen(screen):
@@ -21,7 +21,7 @@ def print_screen(screen):
 def check_lines(lines):
     winnings = 0
     # if you have 5 of a kind they pay a base of 100, 4 pay 30 and 3 pay 3
-    lines_payouts = {5 : 100, 4 : 30, 3 : 10}
+    lines_payouts = {5 : 50, 4 : 10, 3 : 5}
 
     for line in lines:
 
@@ -47,7 +47,7 @@ def spin(balance):
 
         for col in range(5):
             for i in range(3):
-                reel.append(random.choices(list(symbols_multiplier.keys()), weights = [10, 8, 6, 4, 2, 1], k = 1)[0])
+                reel.append(random.choices(list(symbols_multiplier.keys()), weights = [20, 15, 10, 10, 3, 1], k = 1)[0])
             screen.append(reel)
             reel = []
 
