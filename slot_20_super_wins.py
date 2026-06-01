@@ -1,13 +1,17 @@
 import random
 
 symbols_multiplier = {
+            "🍋": 1,
             "🍒": 1,
-            "🍊": 1,
+            "🍊": 2,
             "🍉": 2,
-            "🍇": 2,
-            "👑": 3,
+            "🍇": 3,
+            "👑": 4,
             "🃏": 10
             }
+
+SCATTER_SYMBOL = "⭐"
+SCATTER_PAYOUT = 100
 
 def print_screen(screen):
 
@@ -38,18 +42,38 @@ def check_lines(lines):
             winnings += lines_payouts.get(matches, 0) * symbols_multiplier.get(target, 0)       
 
     return winnings 
-  
+
+def check_scatters(screen):
+    # Flatten the 5x3 screen into one list of 15 items
+    flat_screen = [symbol for col in screen for symbol in col]
+    count = flat_screen.count(SCATTER_SYMBOL)
+    
+    if count >= 3:
+        return SCATTER_PAYOUT
+    return 0
 
 def spin(balance):
         
-        reel = []
         screen = []
+        all_symbols = list(symbols_multiplier.keys())
+
+        normal_weights = [10, 9, 8, 8, 6, 5, 1]
+        scatter_choices = all_symbols + [SCATTER_SYMBOL]
+        scatter_weights = normal_weights + [3]
+            
 
         for col in range(5):
-            for i in range(3):
-                reel.append(random.choices(list(symbols_multiplier.keys()), weights = [20, 15, 10, 10, 3, 1], k = 1)[0])
-            screen.append(reel)
             reel = []
+            is_scatter_reel = col in [0, 2, 4]
+            
+            for i in range(3):
+                if is_scatter_reel and SCATTER_SYMBOL not in reel:
+                    reel.append(random.choices(scatter_choices, weights=scatter_weights, k=1)[0])
+                else:
+                    reel.append(random.choices(all_symbols, weights=normal_weights, k=1)[0])
+
+            screen.append(reel)
+            
 
         lines = [
             [screen[0][0], screen[1][0], screen[2][0], screen[3][0], screen[4][0]],
@@ -74,7 +98,7 @@ def spin(balance):
             [screen[0][1], screen[1][0], screen[2][2], screen[3][0], screen[4][1]]
         ]
 
-        return screen, check_lines(lines)
+        return screen, check_lines(lines) + check_scatters(screen)
 
 
 def main():
