@@ -54,3 +54,24 @@ Each spin is initiated on a key press of any kind, meaning you can play using th
 
     [ ] Implement 3 rows, 5 reels and 20 win lines.
     [ ] Make the joker a wild card.
+
+## Stage 2 - 20 Lines Terminal 
+    
+
+The initial version was very simple and not really fun. So I wanted to introduce 20 pay lines, wilds, scatter symbols and fix the RTP between 94% and 98%.
+
+
+![](https://github.com/VilislavAngelov/20-Super-Wins/blob/20-super-wins/assets/20%20lines%20DEMO.gif)
+
+### The current version accomplishes:
+
+    [X] 20 Pay lines across 5 reels and 3 rows.
+    [X] Joker is a wild symbol.
+    [X] There is now a scatter symbol what pays cash when it lines on reels 1, 3 and 5.
+    [X] RTP tested between 94% and 98%
+    [X] Written tests to make sure line combination pay the right amount by using Hypothesis
+
+    ### Next Version Should:
+
+    [ ] Web interface.
+    [ ] FastAPI integration.
