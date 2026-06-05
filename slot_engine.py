@@ -135,7 +135,7 @@ def main():
 
         print()
         print(f"Balance ${balance}") 
-        
+
     print("Insufficient Balance")
 
 

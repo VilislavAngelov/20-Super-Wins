@@ -1,0 +1,64 @@
+body {
+    background-color: black;
+}
+
+
+
+#screen {
+    grid-area: b;
+    display: grid;
+    width: 600px;
+    height: 400px;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+}
+
+
+.symbol {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 80px;
+}
+
+#balance, #winnings {
+    font-size: 24px;
+    color: white;
+}
+
+.container{
+    width: 1000px;
+    padding: 50px;
+    display: grid;
+    grid-auto-rows: 100px;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-areas:
+    "a a a a a a a"
+    "b b b b b b c"
+    "b b b b b b c"
+    "b b b b b b c"
+    "b b b b b b c"
+    "d d d d d d d";
+}
+
+.title {
+    color: white;
+    text-align: center;
+    grid-area: a;
+}
+
+#spin-button {
+    grid-area: c;
+    width: 100px;
+    height: 100px;
+    background-color: transparent;
+    cursor: pointer;
+    outline: none;
+    border: none;
+}
+
+.player-bar {
+    grid-area: d;
+    display: flex;
+    gap: 500px;
+}

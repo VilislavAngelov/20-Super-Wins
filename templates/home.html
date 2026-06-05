@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>20 Super Wins</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='styles/main.css') }}">
+</head>
+<body>
+    
+    <div class="container">
+        <h1 class="title">20 SUPER WINS</h1>
+        <div class="game">
+            <div id="screen">
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+               <div class="symbol">👑</div>
+            </div>
+        </div>
+    <button id="spin-button" type="button" ><img height="100" width="100" src="{{ url_for('static', path='img/transfer.svg') }}" alt="spin symbol"></button>
+        <div class="player-bar">
+            <div id="balance">Balance:</div>
+            <div id="winnings">Winnings:</div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+</body>
+</html>
