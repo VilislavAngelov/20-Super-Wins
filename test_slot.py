@@ -1,6 +1,6 @@
 import pytest
-from slot_20_super_wins import spin, check_lines
-from slot_20_super_wins import spin, check_scatters
+from slot_engine import spin, check_lines
+from slot_engine import spin, check_scatters
 from hypothesis import given, strategies as st
 
 allowed_symbols = ["🍒", "🍊", "🍉", "🍇", "👑", "🃏"]
@@ -93,7 +93,10 @@ def test_rtp():
 
         total_bets += bet_size
 
-        _, winnings = spin(0)
+        result = spin()
+
+        _ = result["screen"]
+        winnings = result["winnings"]
 
         total_wins += winnings
 

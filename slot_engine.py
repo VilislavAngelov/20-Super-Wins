@@ -21,7 +21,7 @@ def print_screen(screen):
 
     print(on_screen)
 
-
+#TODO make the winnings less frequent but more in amount so the game is more fun or volatile, as the game currently is draining the balance in a more steady and consistent fashion.
 def check_lines(lines):
     winnings = 0
     # if you have 5 of a kind they pay a base of 100, 4 pay 30 and 3 pay 3
@@ -52,7 +52,7 @@ def check_scatters(screen):
         return SCATTER_PAYOUT
     return 0
 
-def spin(balance):
+def spin():
         
         screen = []
         all_symbols = list(symbols_multiplier.keys())
@@ -98,7 +98,12 @@ def spin(balance):
             [screen[0][1], screen[1][0], screen[2][2], screen[3][0], screen[4][1]]
         ]
 
-        return screen, check_lines(lines) + check_scatters(screen)
+        outcome = {
+            "screen": screen,
+            "winnings": check_lines(lines) + check_scatters(screen)
+        }
+
+        return outcome
 
 
 def main():
@@ -116,8 +121,12 @@ def main():
         input("")
         balance -= bet
         
-        screen, winnings = spin(balance)
-        balance += winnings  
+        result = spin()
+
+        screen = result["screen"]
+        winnings = result["winnings"]
+
+        balance += winnings
 
         print_screen(screen)
 
@@ -126,10 +135,12 @@ def main():
 
         print()
         print(f"Balance ${balance}") 
+        
+    print("Insufficient Balance")
 
 
 
 
 if __name__ == "__main__":
     main()
-    print("Insufficient Balance")
+    
