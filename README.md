@@ -75,3 +75,24 @@ The initial version was very simple and not really fun. So I wanted to introduce
 
     [ ] Web interface.
     [ ] FastAPI integration.
+
+## Stage 3 - First Web Version 
+    
+
+Decided it's time to get the web version going
+
+
+![](https://github.com/VilislavAngelov/20-Super-Wins/blob/20-super-wins/assets/WEB%20DEMO.gif)
+
+### The current version accomplishes:
+
+    [X] Basic web interface
+    [X] FastAPI integration
+
+    ### Next Version Should:
+
+    [ ] Server side balance.
+    [ ] Properly aligned layout.
+    [ ] Animations.
+    [ ] Bet amount display.
+    [ ] Styled components.
