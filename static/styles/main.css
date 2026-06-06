@@ -63,7 +63,7 @@ body {
     gap: 50px;
 }
 
-.bet-select {
+#bet-select {
     display: flex;
     flex: 1 1 30%;
     gap: 10px;
