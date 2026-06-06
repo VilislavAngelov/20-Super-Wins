@@ -60,5 +60,18 @@ body {
 .player-bar {
     grid-area: d;
     display: flex;
-    gap: 500px;
+    gap: 50px;
+}
+
+.bet-select {
+    display: flex;
+    flex: 1 1 30%;
+    gap: 10px;
+    width: 100%;
+    justify-content: space-between;
+}
+.bet-amount {
+    font-size: 22px;
+    font-weight: 500;
+    padding: 10px 50px;
 }

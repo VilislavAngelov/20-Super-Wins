@@ -96,3 +96,4 @@ Decided it's time to get the web version going
     [ ] Animations.
     [ ] Bet amount display.
     [ ] Styled components.
+    [ ] Be able to spin with spacebar.
