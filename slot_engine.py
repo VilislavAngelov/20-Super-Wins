@@ -13,14 +13,6 @@ symbols_multiplier = {
 SCATTER_SYMBOL = "⭐"
 SCATTER_PAYOUT = 150
 
-def print_screen(screen):
-
-    on_screen = f"""{screen[0][0]} {screen[1][0]} {screen[2][0]} {screen[3][0]} {screen[4][0]}
-{screen[0][1]} {screen[1][1]} {screen[2][1]} {screen[3][1]} {screen[4][1]}
-{screen[0][2]} {screen[1][2]} {screen[2][2]} {screen[3][2]} {screen[4][2]}"""
-
-    print(on_screen)
-
 #TODO make the winnings less frequent but more in amount so the game is more fun or volatile, as the game currently is draining the balance in a more steady and consistent fashion.
 def check_lines(lines):
     winnings = 0
@@ -98,49 +90,6 @@ def spin():
             [screen[0][1], screen[1][0], screen[2][2], screen[3][0], screen[4][1]]
         ]
 
-        outcome = {
-            "screen": screen,
-            "winnings": check_lines(lines) + check_scatters(screen)
-        }
+        winnings = check_lines(lines) + check_scatters(screen)
 
-        return outcome
-
-
-def main():
- 
-    balance = 1000
-    bet = 10
-
-    print("##########################")
-    print("##### 20 SUPER WINS ######")
-    print("['🃏', '🃏', '🃏']")
-    print("##### Place Your Bet #####")
-    print(f"### Balance ${balance} ###")
-    while balance > bet:
-
-        input("")
-        balance -= bet
-        
-        result = spin()
-
-        screen = result["screen"]
-        winnings = result["winnings"]
-
-        balance += winnings
-
-        print_screen(screen)
-
-        if winnings != 0: 
-            print(f"You Win ${winnings}")
-
-        print()
-        print(f"Balance ${balance}") 
-
-    print("Insufficient Balance")
-
-
-
-
-if __name__ == "__main__":
-    main()
-    
+        return (screen, winnings)
