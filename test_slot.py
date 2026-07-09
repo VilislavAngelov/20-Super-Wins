@@ -93,14 +93,13 @@ def test_rtp():
 
         total_bets += bet_size
 
-        result = spin()
-
-        _ = result["screen"]
-        winnings = result["winnings"]
+        _ , winnings = spin()
 
         total_wins += winnings
 
     rtp_estimate = (total_wins / total_bets) * 100
     print(f"\nEstimated RTP over {num_spins} spins: {rtp_estimate:.2f}%")
 
-    assert 94.0 <= rtp_estimate <= 98.0
+    assert 94.0 <= rtp_estimate <= 98.
+    
+     /spin, /state, /get_cookie, /set_cookie.
