@@ -102,4 +102,3 @@ def test_rtp():
 
     assert 94.0 <= rtp_estimate <= 98.
     
-     /spin, /state, /get_cookie, /set_cookie.
