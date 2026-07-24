@@ -100,5 +100,4 @@ def test_rtp():
     rtp_estimate = (total_wins / total_bets) * 100
     print(f"\nEstimated RTP over {num_spins} spins: {rtp_estimate:.2f}%")
 
-    assert 94.0 <= rtp_estimate <= 98.
-    
+    assert 94.0 <= rtp_estimate <= 98.0
