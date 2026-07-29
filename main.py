@@ -37,24 +37,15 @@ async def spin_json():
         return outcome
     
 @app.get("/state")
-async def get_state():
-    player_id = get_cookie()
+async def get_state(request: Request, response: Response):
+    player_id = request.cookies.get("player_id")
     if player_id in states:
         return states[player_id]
     else:
-        player_id = set_cookie()
+        player_id = str(uuid.uuid4())
+        states[player_id] = {}
         states[player_id]["balance"] = 1000
         states[player_id]["bet_size"] = 40
+        response.set_cookie(key="player_id", value=player_id)
     
     return  states[player_id]
-
-@app.get("/get_cookie")
-async def get_cookie(request: Request):
-    return request.cookies.get("player_id")
-
-@app.get("/set_cookie")
-async def set_cookie(response: Response):
-    player_id = uuid.uuid4()
-    response.set_cookie(key="player_id", value=player_id)
-    return player_id
-    
