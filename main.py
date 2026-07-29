@@ -1,12 +1,10 @@
 from slot_engine import spin
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import uuid
 
-player_balance = 1000
-bet_size = 10
 allowed_bets = [10, 20, 40, 80, 120]
 
 states = {}
@@ -24,17 +22,23 @@ async def home(request: Request):
     )
 
 @app.get("/spin")
-async def spin_json():
-    global player_balance
-    if(player_balance >= bet_size):
-        screen, winnings = spin()
-        player_balance = (player_balance - bet_size) + winnings
-        outcome = {
-            "screen": screen,
-            "winnings": winnings,
-            "balance": player_balance
-        }
+async def spin_json(request: Request):
+    player_id = request.cookies.get("player_id")
+    if player_id in states:
+        player = states[player_id]
+        if player["balance"] < player["bet_size"]:
+            raise HTTPException(status_code=400, detail="not enough balance")
+        else:
+            screen, winnings = spin()
+            player["balance"] = (player["balance"] - player["bet_size"]) + winnings
+            outcome = {
+                "screen": screen,
+                "winnings": winnings,
+                "balance": player["balance"]
+            }
         return outcome
+    else:
+        raise HTTPException(status_code=400, detail="No player session found")
     
 @app.get("/state")
 async def get_state(request: Request, response: Response):
