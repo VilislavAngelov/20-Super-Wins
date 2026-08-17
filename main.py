@@ -27,18 +27,21 @@ async def spin_json(request: Request):
     if player_id in states:
         player = states[player_id]
         if player["balance"] < player["bet_size"]:
-            raise HTTPException(status_code=400, detail="not enough balance")
+            raise HTTPException(status_code=402, detail="not enough balance")
         else:
             screen, winnings = spin()
             player["balance"] = (player["balance"] - player["bet_size"]) + winnings
+            if winnings > 0:
+                player["last_win"] = winnings
             outcome = {
                 "screen": screen,
                 "winnings": winnings,
-                "balance": player["balance"]
+                "balance": player["balance"],
+                "last_win": player["last_win"]
             }
         return outcome
     else:
-        raise HTTPException(status_code=400, detail="No player session found")
+        raise HTTPException(status_code=401, detail="No player session found")
     
 @app.get("/state")
 async def get_state(request: Request, response: Response):
@@ -50,6 +53,17 @@ async def get_state(request: Request, response: Response):
         states[player_id] = {}
         states[player_id]["balance"] = 1000
         states[player_id]["bet_size"] = 40
+        states[player_id]["last_win"] = 0
         response.set_cookie(key="player_id", value=player_id)
     
     return  states[player_id]
+
+@app.post("/reset-balance")
+async def reset_balance(request: Request):
+    player_id = request.cookies.get("player_id")
+    if player_id in states:
+        states[player_id]["balance"] = 1000
+    
+        return  states[player_id]["balance"]
+    else:
+        raise HTTPException(status_code=401, detail="No player session found")

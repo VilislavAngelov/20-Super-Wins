@@ -3,14 +3,21 @@ const balance = document.getElementById('balance');
 const winnings = document.getElementById('winnings');
 const cells = document.querySelectorAll('.symbol');
 const bet_select = document.getElementById('bet-select')
-
-balance.textContent = 'Balance: $' + playerBalance;
+const reset_balance = document.getElementById('reset-balance')
 
 //This kind of works but can be abused because someone can use inspect on a bet amount, change it locally and then bet $800 instead of 80 for examle. I think bet sizes should be server size as well as the balance
 
 bet_select.addEventListener('click', function(e) {
-    BET = parseInt(e.target.dataset.bet);
+    let BET = parseInt(e.target.dataset.bet);
 })
+
+async function loadState() {
+    const response = await fetch('/state');
+    const data = await response.json();
+
+    balance.textContent = 'Balance: $' + data.balance;
+    winnings.textContent = 'Last Win: $' + data.last_win;
+}
 
 spin_button.addEventListener('click', async () => {
     const response = await fetch('/spin');
@@ -21,7 +28,14 @@ spin_button.addEventListener('click', async () => {
     });
 
     balance.textContent = 'Balance: $' + data.balance;
-    winnings.textContent = 'Winnings: $' + data.winnings; 
+    winnings.textContent = 'Last Win: $' + data.last_win; 
 })
 
+reset_balance.addEventListener('click', async () => {
+    const response = await fetch('/reset-balance', {method: "POST"});
+
+    balance.textContent = 'Balance: $' + data;
+})
+
+loadState()
 
