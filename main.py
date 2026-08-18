@@ -1,26 +1,34 @@
+# imports from various libraries. 
 from slot_engine import spin
 from fastapi import FastAPI, Request, Response, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import uuid
+from pydantic import BaseModel
 
-allowed_bets = [10, 20, 40, 80, 120]
-
+allowed_bets = (10, 20, 40, 80, 120)
 states = {}
-
 app = FastAPI()
 
+# serves the css/js/image files from the static/ folder.
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# templating engine, in other words enables you to put dynamic values in the html ex. a python variable
 templates = Jinja2Templates(directory="templates")
 
+class Bet(BaseModel):
+    bet_size: int
+
+# when a GET request hits "/", FastAPI calls home(Request) and hands you the request object which is the home.html as a response
 @app.get("/")
 async def home(request: Request):
     return templates.TemplateResponse(
         request=request, name="home.html", context={"name": "Leetcode1337"}
     )
 
+# GET request hits "/spin", FastAPI calls spin_json(Request) and we check if the player already has a cookie set. This is the current way of identification. If they are present in the dict states, we assing them their balance , last bet_size and last win. then we call spin and display the results to the user 
+#TODO add the last screen they have seen to the state
 @app.get("/spin")
 async def spin_json(request: Request):
     player_id = request.cookies.get("player_id")
@@ -42,7 +50,8 @@ async def spin_json(request: Request):
         return outcome
     else:
         raise HTTPException(status_code=401, detail="No player session found")
-    
+
+# Checks if player the player cookie is in the existing dict and if not it creates a new user id , assigns the baseline balance and bet size and saves the uid as a cookie and returns the cookie 
 @app.get("/state")
 async def get_state(request: Request, response: Response):
     player_id = request.cookies.get("player_id")
@@ -58,6 +67,7 @@ async def get_state(request: Request, response: Response):
     
     return  states[player_id]
 
+# Resets the balance to the baseline
 @app.post("/reset-balance")
 async def reset_balance(request: Request):
     player_id = request.cookies.get("player_id")
@@ -65,5 +75,18 @@ async def reset_balance(request: Request):
         states[player_id]["balance"] = 1000
     
         return  states[player_id]["balance"]
+    else:
+        raise HTTPException(status_code=401, detail="No player session found")
+
+# Player selects a bet amount 
+@app.post("/bet")
+async def bet(bet_size: Bet, request: Request):
+    player_id = request.cookies.get("player_id")
+    if player_id in states:
+        if bet_size.bet_size in allowed_bets:
+            states[player_id]["bet_size"] = bet_size.bet_size
+            return bet_size.bet_size
+        else:
+            raise HTTPException(status_code=400, detail="Bet not allowed")
     else:
         raise HTTPException(status_code=401, detail="No player session found")
