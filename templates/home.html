@@ -12,21 +12,15 @@
         <h1 class="title">20 SUPER WINS</h1>
         <div class="game">
             <div id="screen">
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
-               <div class="symbol">👑</div>
+                {% for reel in range(5) %}
+                    <div class="reel" data-reel="{{ reel }}">
+                        <div class="strip">
+                            {% for symbol in range(3)%}
+                                <div class="symbol" data-row="{{ symbol }}"></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
         </div>
     <button id="spin-button" type="button" ><img height="100" width="100" src="{{ url_for('static', path='img/transfer.svg') }}" alt="spin symbol"></button>

@@ -1,7 +1,7 @@
 const spin_button = document.getElementById('spin-button');
 const balance = document.getElementById('balance');
 const winnings = document.getElementById('winnings');
-const cells = document.querySelectorAll('.symbol');
+const strips = document.querySelectorAll('.strip');
 const bet_select = document.getElementById('bet-select')
 const reset_balance = document.getElementById('reset-balance')
 let bet_buttons = document.getElementsByClassName("bet-amount")
@@ -32,10 +32,12 @@ async function doSpin() {
     const data = await response.json();
 
     if (response.ok){
-        cells.forEach((cell, i) => {
-            cell.textContent = data.screen[i % 5][Math.floor(i / 5)]
+        strips.forEach((strip, reel) => {
+            const symbols = strip.querySelectorAll('.symbol')
+                symbols.forEach((symbol, row) => {
+                    symbol.textContent = data.screen[reel][row]
+            }) 
         });
-
         balance.textContent = 'Balance: $' + data.balance;
         winnings.textContent = 'Last Win: $' + data.last_win; 
     }
