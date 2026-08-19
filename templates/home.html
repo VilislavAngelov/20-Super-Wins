@@ -15,6 +15,9 @@
                 {% for reel in range(5) %}
                     <div class="reel" data-reel="{{ reel }}">
                         <div class="strip">
+                            {% for symbol in range(17)%}
+                                <div class="symbol" data-row="{{ symbol }}"></div>
+                            {% endfor %}
                             {% for symbol in range(3)%}
                                 <div class="symbol" data-row="{{ symbol }}"></div>
                             {% endfor %}

@@ -83,4 +83,5 @@ body {
 .strip{
     display: flex;
     flex-direction: column;
+    transition: transform 1.5s ease-in;
 }
