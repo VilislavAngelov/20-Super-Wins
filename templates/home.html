@@ -12,14 +12,17 @@
         <h1 class="title">20 SUPER WINS</h1>
         <div class="game">
             <div id="screen">
-                {% for reel in range(5) %}
-                    <div class="reel" data-reel="{{ reel }}">
+                {% for reel in screen %}
+                    <div class="reel" data-reel="{{ loop.index0 }}" style="--travel: {{ 6 + loop.index0 }}">
                         <div class="strip">
-                            {% for symbol in range(17)%}
-                                <div class="symbol" data-row="{{ symbol }}"></div>
+                            {% for symbol in reel %}
+                                <div class="symbol" data-row="{{ symbol }}">{{ symbol }}</div>
                             {% endfor %}
-                            {% for symbol in range(3)%}
-                                <div class="symbol" data-row="{{ symbol }}"></div>
+                            {% for symbol in range(3 + loop.index0) %}
+                                <div class="symbol" data-row="{{ symbol }}">{{ slot_symbols|random }}</div>
+                            {% endfor %}
+                            {% for symbol in reel %}
+                                <div class="symbol" data-row="{{ symbol }}">{{ symbol }}</div>
                             {% endfor %}
                         </div>
                     </div>
