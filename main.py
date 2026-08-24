@@ -56,7 +56,7 @@ async def home(request: Request):
 
 # GET request hits "/spin", FastAPI calls spin_json(Request) and we check if the player already has a cookie set. This is the current way of identification. If they are present in the dict states, we assing them their balance , last bet_size and last win. then we call spin and display the results to the user 
 #TODO add the last screen they have seen to the state
-@app.get("/spin")
+@app.post("/spin")
 async def spin_json(request: Request):
     player_id = request.cookies.get("player_id")
     if player_id in states:
@@ -65,6 +65,7 @@ async def spin_json(request: Request):
             raise HTTPException(status_code=402, detail="not enough balance")
         else:
             screen, winnings = spin()
+            player["spin_balance"] = player["balance"] - player["bet_size"]
             player["balance"] = (player["balance"] - player["bet_size"]) + winnings
             if winnings > 0:
                 player["last_win"] = winnings
@@ -73,7 +74,8 @@ async def spin_json(request: Request):
                     "screen": screen,
                     "winnings": winnings,
                     "balance": player["balance"],
-                    "last_win": player["last_win"]
+                    "last_win": player["last_win"],
+                    "spin_balance": player["spin_balance"]
             }
         return outcome
     else:

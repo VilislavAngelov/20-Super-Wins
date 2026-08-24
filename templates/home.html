@@ -29,7 +29,9 @@
                 {% endfor %}
             </div>
         </div>
-    <button id="spin-button" type="button" ><img height="100" width="100" src="{{ url_for('static', path='img/transfer.svg') }}" alt="spin symbol"></button>
+    <button id="spin-button" type="button" ><img height="100" width="100" src="{{ url_for('static', path='img/spin-start.svg') }}" alt="spin button"></button>
+    <button id="stop-button" type="button" ><img height="100" width="100" src="{{ url_for('static', path='img/spin-stop.svg') }}" alt="stop button"></button>
+    
         <div class="player-bar">
             <div id="balance">Balance:</div>
             <div id="bet-select">
