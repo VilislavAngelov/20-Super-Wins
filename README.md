@@ -97,3 +97,37 @@ Decided it's time to get the web version going
     [ ] Bet amount display.
     [ ] Styled components.
     [ ] Be able to spin with spacebar.
+
+## Stage 4 - Sessions, Real API and Animations 
+    
+
+The web version worked but the balance was a single global variable, so every player shared the same money. That had to go first. I gave each player a unique id in a cookie and moved the balance, the bet size and the last screen into a server side session, so now your money is yours and it survives a refresh.
+
+After that I cleaned up the API. GET /state paints your balance and last win on page load, POST /bet validates the bet against the allowed sizes instead of trusting whatever the browser sends, and the status codes actually mean something now, 402 when you can't afford the spin and 401 when there is no session. /spin became a POST too, because a GET is supposed to be safe and mine was taking money, which meant you could spin by pasting the url or by the browser prefetching it.
+
+Then came the part that took the longest, making it feel like a slot machine. I threw away the one shot CSS transition and switched to keyframe animations, one that loops forever and one that lands. The reels now spin until the server answers instead of waiting for it, and each reel is 3 tiles longer than the one before it so they all start together at the same speed but stop one after the other. The distance and the duration both come from the same CSS variable so they can't drift apart. Sounds play on animationend now so they can't desync from the animation, the win counter ticks up after the reels stop instead of spoiling the result, and the spin button has three states so you can't spam it.
+
+
+![](https://github.com/VilislavAngelov/20-Super-Wins/blob/20-super-wins/assets/STAGE%204.gif)
+
+### The current version accomplishes:
+
+    [X] Unique player id in a cookie with a server side session.
+    [X] Balance, bet size and last screen stored per player.
+    [X] GET /state, POST /bet and POST /spin with proper status codes.
+    [X] Bet size validated on the server instead of trusting the browser.
+    [X] Last screen saved and rendered into the page on load so there is no blank flash.
+    [X] Reels loop until the server responds instead of waiting for it.
+    [X] Reels start together and land one at a time.
+    [X] Landing sounds fired by the animation itself, no timers.
+    [X] Winnings count up after the reels stop.
+    [X] Idle, waiting and spinning states with a spin and a stop button.
+
+### Next Version Should:
+
+    [ ] Stop the reels instantly with the Web Animations API instead of waiting for a wrap point.
+    [ ] Keep the reels stopping in order when you hit stop early.
+    [ ] Rate limit /spin on the server so it can't be spammed.
+    [ ] Move the sessions out of a dict and into a database.
+    [ ] Refactor into classes.
+    [ ] Be able to spin with spacebar.
