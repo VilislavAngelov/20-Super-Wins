@@ -3,10 +3,11 @@ const stop_button = document.getElementById('stop-button');
 const balance = document.getElementById('balance');
 const winnings = document.getElementById('winnings');
 const strips = document.querySelectorAll('.strip');
-const bet_select = document.getElementById('bet-select')
-const reset_balance = document.getElementById('reset-balance')
-let bet_buttons = document.getElementsByClassName("bet-amount")
-const SYMBOLS = ["🍋","🍒","🍊","🍉","🍇","👑","🃏","⭐"]
+const reels = document.querySelectorAll('.reel');
+const bet_select = document.getElementById('bet-select');
+const reset_balance = document.getElementById('reset-balance');
+let bet_buttons = document.getElementsByClassName("bet-amount");
+const SYMBOLS = ["🍋","🍒","🍊","🍉","🍇","👑","🃏","⭐"];
 let landing_sound0 = new Audio("/static/sounds/land.wav");
 let landing_sound1 = new Audio("/static/sounds/land.wav");
 let landing_sound2 = new Audio("/static/sounds/land.wav");
@@ -15,8 +16,12 @@ let landing_sound4 = new Audio("/static/sounds/land.wav");
 let landing_sounds = [landing_sound0, landing_sound1, landing_sound2, landing_sound3, landing_sound4];
 let interval = 2000;
 let spin_result = null
-let wraps = [0, 0, 0, 0, 0]
+let animations = []
+let last_lap = [0, 0, 0, 0, 0]
 let spin_iterations = 2
+
+
+
 
 for(let i = 0; i < bet_buttons.length; i++){
     bet_buttons[i].addEventListener('click', async (e) => {
@@ -28,39 +33,6 @@ for(let i = 0; i < bet_buttons.length; i++){
     doSpin()
 })
 }
-
-strips.forEach((strip,reel) => {
-    const symbols = strip.querySelectorAll('.symbol')
-    strip.addEventListener("animationiteration", () => {
-
-        symbols[symbols.length - 3].textContent = symbols[0].textContent
-        symbols[symbols.length - 2].textContent = symbols[1].textContent
-        symbols[symbols.length - 1].textContent = symbols[2].textContent
-
-        for (let i = 3; i < symbols.length - 3; i++) {
-            symbols[i].textContent = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]
-                
-        }
-        wraps[reel] += 1 
-        if (spin_result != null) {
-            if (wraps[reel] < spin_iterations){
-                return
-            }
-            for (let i = 0; i < 3; i++) {
-                symbols[i].textContent = spin_result[reel][i]
-            }   
-            strip.classList.remove('loop')
-            strip.classList.add('land')  
-        }
-    })
-
-    strip.addEventListener("animationend", () => {
-        strip.classList.remove('land')
-        landing_sounds[reel].currentTime = 0
-        landing_sounds[reel].play()
-    })
-})
-
 
 async function loadState() {
     const response = await fetch('/state');
@@ -75,6 +47,9 @@ async function loadState() {
 function spin_animation() {
     strips.forEach((strip,reel) => {
         const symbols = strip.querySelectorAll('.symbol')
+        const tiles = (symbols.length - 3)
+        let travel =  tiles * symbols[0].offsetHeight
+        let duration = tiles * 100
         
         symbols[symbols.length - 3].textContent = symbols[0].textContent
         symbols[symbols.length - 2].textContent = symbols[1].textContent
@@ -83,14 +58,23 @@ function spin_animation() {
         for (let i = 3; i < symbols.length - 3; i++) {
                 symbols[i].textContent = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]
             } 
-
-        strip.classList.add('loop')
+        
+        animations[reel] = strip.animate(
+            [
+                { transform: `translateY(-${travel}px)`},
+                { transform: "translateY(0)" }
+            ],
+            {
+                duration: duration,
+                iterations: Infinity
+            }
+        )
     })
 }
 
 async function doSpin() {
     spin_result = null
-    wraps = [0, 0, 0, 0, 0]
+    last_lap = [0, 0, 0, 0, 0]
     spin_iterations = 2
     change_spin_state('WAITING')
     spin_animation()
@@ -168,4 +152,23 @@ function change_spin_state(spin_state) {
     }
 }
 
+function watch_animation() {
+    animations.forEach((animation, reel) => {
+        const symbols = strips[reel].querySelectorAll('.symbol')
+        let lap = Math.floor(animation.currentTime / animation.effect.getTiming().duration)
+        if (lap !== last_lap[reel]) {
+            symbols[symbols.length - 3].textContent = symbols[0].textContent
+            symbols[symbols.length - 2].textContent = symbols[1].textContent
+            symbols[symbols.length - 1].textContent = symbols[2].textContent
+
+            for (let i = 3; i < symbols.length - 3; i++) {
+                symbols[i].textContent = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]    
+            }
+        }
+        last_lap[reel] = lap
+    })
+    requestAnimationFrame(watch_animation)
+}
+
 loadState()
+requestAnimationFrame(watch_animation)
