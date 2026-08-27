@@ -99,19 +99,3 @@ body {
     display: flex;
     flex-direction: column;
 }
-
-.loop { 
-    animation: reel-loop linear calc(var(--travel) * 100ms) infinite; 
-}
-
-.land {
-    animation: reel-land linear calc(var(--travel) * 100ms);
-}
-
-@keyframes reel-loop {
-    from { transform: translateY(calc(var(--travel) * var(--symbol-h) * -1)) }
-    to   { transform: translateY(0) }
-}
-@keyframes reel-land { 
-    from { transform: translateY(calc(var(--travel) * var(--symbol-h) * -1)) } 
-    to { transform: translateY(0) } }
