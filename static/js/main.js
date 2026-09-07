@@ -23,6 +23,8 @@ let spin_data = null
 let laps_after_result = [0, 0, 0, 0, 0]
 let stopping = false
 let landed = 0
+let show_index = 0
+let win_timer = null
 
 for (let i = 0; i < bet_buttons.length; i++) {
     bet_buttons[i].addEventListener('click', async (e) => {
@@ -92,7 +94,30 @@ function display_wins() {
     }
 }
 
+function clear_wins() {
+    document.querySelectorAll('.symbol').forEach(s => s.classList.remove('lit'))
+}
 
+function light_wins(i) {
+    for (const [reel, row] of spin_data.wins[i].cells) {
+        strips[reel].querySelectorAll('.symbol')[row].classList.add("lit")
+    }
+}
+
+function show_next_win() {
+
+    if(show_index == spin_data.wins.length) {
+        clear_wins()
+        for (let i = 0; i < spin_data.wins.length; i++) {
+        light_wins(i)}
+        clearInterval(win_timer) 
+    } else {
+        clear_wins()
+        light_wins(show_index)
+        show_index += 1
+    }  
+
+}
 
 async function doSpin() {
     spin_result = null
@@ -100,7 +125,9 @@ async function doSpin() {
     stopping = false
     landed = 0
     laps_after_result = [0, 0, 0, 0, 0]
-    document.querySelectorAll('.symbol').forEach(s => s.classList.remove('lit'))
+    show_index = 0
+    clearInterval(win_timer)
+    clear_wins()
     change_spin_state('WAITING')
     spin_animation()
     const response = await fetch('/spin', { method: "POST" });
@@ -181,10 +208,9 @@ function land(reel) {
         landed++
         if (landed === strips.length){
             display_wins()
-            for (let i = 0; i < spin_data.wins.length; i++){
-                for (const [reel, row] of spin_data.wins[i].cells) {
-                    strips[reel].querySelectorAll('.symbol')[row].classList.add("lit")
-                }
+            
+            if (spin_data.wins.length > 0) {
+                win_timer = setInterval(show_next_win, 500)
             }
         } 
     })
