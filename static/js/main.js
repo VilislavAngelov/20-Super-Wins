@@ -100,6 +100,7 @@ async function doSpin() {
     stopping = false
     landed = 0
     laps_after_result = [0, 0, 0, 0, 0]
+    document.querySelectorAll('.symbol').forEach(s => s.classList.remove('lit'))
     change_spin_state('WAITING')
     spin_animation()
     const response = await fetch('/spin', { method: "POST" });
@@ -178,7 +179,14 @@ function land(reel) {
         symbols[symbols.length - 1].textContent = symbols[2].textContent
 
         landed++
-        if (landed === strips.length) display_wins()
+        if (landed === strips.length){
+            display_wins()
+            for (let i = 0; i < spin_data.wins.length; i++){
+                for (const [reel, row] of spin_data.wins[i].cells) {
+                    strips[reel].querySelectorAll('.symbol')[row].classList.add("lit")
+                }
+            }
+        } 
     })
 }
 

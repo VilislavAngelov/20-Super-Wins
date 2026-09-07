@@ -64,7 +64,7 @@ async def spin_json(request: Request):
         if player["balance"] < player["bet_size"]:
             raise HTTPException(status_code=402, detail="not enough balance")
         else:
-            screen, winnings = spin()
+            screen, winnings, wins = spin()
             player["spin_balance"] = player["balance"] - player["bet_size"]
             player["balance"] = (player["balance"] - player["bet_size"]) + winnings
             if winnings > 0:
@@ -75,7 +75,8 @@ async def spin_json(request: Request):
                     "winnings": winnings,
                     "balance": player["balance"],
                     "last_win": player["last_win"],
-                    "spin_balance": player["spin_balance"]
+                    "spin_balance": player["spin_balance"],
+                    "wins": wins
             }
         return outcome
     else:

@@ -13,18 +13,44 @@ symbols_multiplier = {
 SCATTER_SYMBOL = "⭐"
 SCATTER_PAYOUT = 150
 
+PAYLINES = [   
+            ((0,0), (1,0), (2,0), (3,0), (4,0)),
+            ((0,1), (1,1), (2,1), (3,1), (4,1)),
+            ((0,2), (1,2), (2,2), (3,2), (4,2)),
+            ((0,0), (1,1), (2,2), (3,1), (4,0)),
+            ((0,2), (1,1), (2,0), (3,1), (4,2)),
+            ((0,0), (1,0), (2,1), (3,2), (4,2)),
+            ((0,2), (1,2), (2,1), (3,0), (4,0)),
+            ((0,1), (1,2), (2,2), (3,2), (4,1)),
+            ((0,1), (1,0), (2,0), (3,0), (4,1)),
+            ((0,0), (1,1), (2,1), (3,1), (4,0)),
+            ((0,2), (1,1), (2,1), (3,1), (4,2)),
+            ((0,1), (1,2), (2,1), (3,0), (4,1)),
+            ((0,1), (1,0), (2,1), (3,2), (4,1)),
+            ((0,0), (1,1), (2,0), (3,1), (4,0)),
+            ((0,2), (1,1), (2,2), (3,1), (4,2)),
+            ((0,1), (1,1), (2,2), (3,1), (4,1)),
+            ((0,1), (1,1), (2,0), (3,1), (4,1)),
+            ((0,0), (1,2), (2,0), (3,2), (4,0)),
+            ((0,2), (1,0), (2,2), (3,0), (4,2)),
+            ((0,1), (1,0), (2,2), (3,0), (4,1))
+            ]
+
 #TODO make the winnings less frequent but more in amount so the game is more fun or volatile, as the game currently is draining the balance in a more steady and consistent fashion.
-def check_lines(lines):
+def check_lines(screen):
     winnings = 0
-    # if you have 5 of a kind they pay a base of 100, 4 pay 30 and 3 pay 3
+    wins = []
+
+    # if you have 5 of a kind they pay a base of 50, 4 pay 10 and 3 pay 5
     lines_payouts = {5 : 50, 4 : 10, 3 : 5}
 
-    for line in lines:
+    for index, payline in enumerate(PAYLINES):
 
-        target = next((s for s in line if s != "🃏"), "🃏")
-
+        symbols = [screen[reel][row] for reel, row in payline]
+        target = next((s for s in symbols if s != "🃏"), "🃏")
         matches = 0
-        for s in line:
+
+        for s in symbols:
             if s == target or s == "🃏":
                 matches += 1
             else:
@@ -32,8 +58,14 @@ def check_lines(lines):
 
         if matches >= 3:
             winnings += lines_payouts.get(matches, 0) * symbols_multiplier.get(target, 0)       
-
-    return winnings 
+            win = {
+                    "line": index,
+                    "cells": payline[:matches],
+                    "symbol": target,
+                    "payout": lines_payouts.get(matches, 0) * symbols_multiplier.get(target, 0)
+            }
+            wins.append(win)
+    return (wins, winnings)
 
 def check_scatters(screen):
     # Flatten the 5x3 screen into one list of 15 items
@@ -65,31 +97,8 @@ def spin():
                     reel.append(random.choices(all_symbols, weights=normal_weights, k=1)[0])
 
             screen.append(reel)
-            
 
-        lines = [
-            [screen[0][0], screen[1][0], screen[2][0], screen[3][0], screen[4][0]],
-            [screen[0][1], screen[1][1], screen[2][1], screen[3][1], screen[4][1]],
-            [screen[0][2], screen[1][2], screen[2][2], screen[3][2], screen[4][2]],
-            [screen[0][0], screen[1][1], screen[2][2], screen[3][1], screen[4][0]],
-            [screen[0][2], screen[1][1], screen[2][0], screen[3][1], screen[4][2]],
-            [screen[0][0], screen[1][0], screen[2][1], screen[3][2], screen[4][2]],
-            [screen[0][2], screen[1][2], screen[2][1], screen[3][0], screen[4][0]],
-            [screen[0][1], screen[1][2], screen[2][2], screen[3][2], screen[4][1]],
-            [screen[0][1], screen[1][0], screen[2][0], screen[3][0], screen[4][1]],
-            [screen[0][0], screen[1][1], screen[2][1], screen[3][1], screen[4][0]],
-            [screen[0][2], screen[1][1], screen[2][1], screen[3][1], screen[4][2]],
-            [screen[0][1], screen[1][2], screen[2][1], screen[3][0], screen[4][1]],
-            [screen[0][1], screen[1][0], screen[2][1], screen[3][2], screen[4][1]],
-            [screen[0][0], screen[1][1], screen[2][0], screen[3][1], screen[4][0]],
-            [screen[0][2], screen[1][1], screen[2][2], screen[3][1], screen[4][2]],
-            [screen[0][1], screen[1][1], screen[2][2], screen[3][1], screen[4][1]],
-            [screen[0][1], screen[1][1], screen[2][0], screen[3][1], screen[4][1]],
-            [screen[0][0], screen[1][2], screen[2][0], screen[3][2], screen[4][0]],
-            [screen[0][2], screen[1][0], screen[2][2], screen[3][0], screen[4][2]],
-            [screen[0][1], screen[1][0], screen[2][2], screen[3][0], screen[4][1]]
-        ]
+        wins, winnings = check_lines(screen)
+        winnings += check_scatters(screen)
 
-        winnings = check_lines(lines) + check_scatters(screen)
-
-        return (screen, winnings)
+        return (screen, winnings, wins)
