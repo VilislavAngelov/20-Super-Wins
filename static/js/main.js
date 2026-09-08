@@ -6,8 +6,9 @@ const strips = document.querySelectorAll('.strip');
 const reels = document.querySelectorAll('.reel');
 const bet_select = document.getElementById('bet-select');
 const reset_balance = document.getElementById('reset-balance');
-let bet_buttons = document.getElementsByClassName("bet-amount");
 const SYMBOLS = ["🍋", "🍒", "🍊", "🍉", "🍇", "👑", "🃏", "⭐"];
+
+let bet_buttons = document.getElementsByClassName("bet-amount");
 let landing_sound0 = new Audio("/static/sounds/land.wav");
 let landing_sound1 = new Audio("/static/sounds/land.wav");
 let landing_sound2 = new Audio("/static/sounds/land.wav");
@@ -25,6 +26,34 @@ let stopping = false
 let landed = 0
 let show_index = 0
 let win_timer = null
+let spin_state = 'IDLE'
+
+async function loadState() {
+    const response = await fetch('/state');
+    const data = await response.json();
+
+    balance.textContent = 'Balance: $' + data.balance;
+    winnings.textContent = 'Last Win: $' + data.last_win;
+}
+
+spin_button.addEventListener('click', async () => {
+    doSpin()
+})
+
+document.body.onkeyup = function(e) {
+    if (e.key == " " ||
+        e.code == "Space" ||      
+        e.keyCode == 32) {
+            if (spin_state == 'IDLE') {
+                change_spin_state('WAITING')
+                doSpin()
+            }else if (spin_state == 'SPINNING' &&  spin_result !== null) {
+                stopping = true
+                stop_button.disabled = true
+            }else {
+                return
+            }}
+}
 
 for (let i = 0; i < bet_buttons.length; i++) {
     bet_buttons[i].addEventListener('click', async (e) => {
@@ -37,16 +66,42 @@ for (let i = 0; i < bet_buttons.length; i++) {
     })
 }
 
-async function loadState() {
-    const response = await fetch('/state');
+stop_button.addEventListener('click', () => {
+    if (spin_result === null) return
+    stopping = true
+    stop_button.disabled = true
+})
+
+reset_balance.addEventListener('click', async () => {
+    const response = await fetch('/reset-balance', { method: "POST" });
     const data = await response.json();
 
-    balance.textContent = 'Balance: $' + data.balance;
-    winnings.textContent = 'Last Win: $' + data.last_win;
+    balance.textContent = 'Balance: $' + data
+})
+
+async function doSpin() {
+    spin_result = null
+    last_lap = [0, 0, 0, 0, 0]
+    stopping = false
+    landed = 0
+    laps_after_result = [0, 0, 0, 0, 0]
+    show_index = 0
+    clearInterval(win_timer)
+    clear_wins()
+    change_spin_state('WAITING')
+    spin_animation()
+    const response = await fetch('/spin', { method: "POST" });
+    const data = await response.json();
+    spin_data = data
+
+    if (response.ok) {
+        change_spin_state('SPINNING')
+        balance.textContent = 'Balance: $' + data.spin_balance;
+
+        spin_result = data.screen
+    }
 }
 
-// I need to make this function spin infinitely until we get a response from the /spin api and a response code
-// we have to select the screen and insert it in the infinitely spinning animation
 function spin_animation() {
     strips.forEach((strip, reel) => {
         const symbols = strip.querySelectorAll('.symbol')
@@ -119,61 +174,26 @@ function show_next_win() {
 
 }
 
-async function doSpin() {
-    spin_result = null
-    last_lap = [0, 0, 0, 0, 0]
-    stopping = false
-    landed = 0
-    laps_after_result = [0, 0, 0, 0, 0]
-    show_index = 0
-    clearInterval(win_timer)
-    clear_wins()
-    change_spin_state('WAITING')
-    spin_animation()
-    const response = await fetch('/spin', { method: "POST" });
-    const data = await response.json();
-    spin_data = data
 
-    if (response.ok) {
-        change_spin_state('SPINNING')
-        balance.textContent = 'Balance: $' + data.spin_balance;
 
-        spin_result = data.screen
-    }
-}
-
-spin_button.addEventListener('click', async () => {
-    doSpin()
-})
-
-stop_button.addEventListener('click', () => {
-    if (spin_result === null) return
-    stopping = true
-    stop_button.disabled = true
-})
-
-reset_balance.addEventListener('click', async () => {
-    const response = await fetch('/reset-balance', { method: "POST" });
-    const data = await response.json();
-
-    balance.textContent = 'Balance: $' + data
-})
-
-function change_spin_state(spin_state) {
-    switch (spin_state) {
+function change_spin_state(new_state) {
+    switch (new_state) {
         case 'IDLE':
+            spin_state = 'IDLE'
             spin_button.disabled = false;
             spin_button.style.display = 'block';
             stop_button.disabled = true;
             stop_button.style.display = 'none';
             break;
         case 'WAITING':
+            spin_state = 'WAITING'
             spin_button.disabled = true;
             spin_button.style.display = 'none';
             stop_button.disabled = true;
             stop_button.style.display = 'none';
             break;
         case 'SPINNING':
+            spin_state = 'SPINNING'
             spin_button.disabled = true;
             spin_button.style.display = 'none';
             stop_button.disabled = false;
