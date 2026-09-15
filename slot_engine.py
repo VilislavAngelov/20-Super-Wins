@@ -1,5 +1,6 @@
 import random
 
+lines_payouts = {5 : 50, 4 : 10, 3 : 5}
 symbols_multiplier = {
             "🍋": 1,
             "🍒": 1,
@@ -36,35 +37,35 @@ PAYLINES = [
             ((0,1), (1,0), (2,2), (3,0), (4,1))
             ]
 
-#TODO make the winnings less frequent but more in amount so the game is more fun or volatile, as the game currently is draining the balance in a more steady and consistent fashion.
+def check_matches(symbols, target):
+    matches = 0
+
+    for s in symbols:
+        if s == target or s == "🃏":
+            matches += 1
+        else:
+            break
+    return matches
+
+
 def check_lines(screen):
     winnings = 0
     wins = []
-
-    # if you have 5 of a kind they pay a base of 50, 4 pay 10 and 3 pay 5
-    lines_payouts = {5 : 50, 4 : 10, 3 : 5}
-
     for index, payline in enumerate(PAYLINES):
 
         symbols = [screen[reel][row] for reel, row in payline]
-        target = next((s for s in symbols if s != "🃏"), "🃏")
-        matches = 0
-
-        for s in symbols:
-            if s == target or s == "🃏":
-                matches += 1
-            else:
-                break
-
+        matches, target, payout = score_line(symbols)
         if matches >= 3:
-            winnings += lines_payouts.get(matches, 0) * symbols_multiplier.get(target, 0)       
-            win = {
+                winnings += payout      
+                win = {
                     "line": index,
                     "cells": payline[:matches],
                     "symbol": target,
-                    "payout": lines_payouts.get(matches, 0) * symbols_multiplier.get(target, 0)
-            }
-            wins.append(win)
+                    "payout": payout
+                }
+                wins.append(win) 
+
+
     return (wins, winnings)
 
 def check_scatters(screen):
@@ -75,6 +76,7 @@ def check_scatters(screen):
     if count >= 3:
         return SCATTER_PAYOUT
     return 0
+
 
 def spin():
         
@@ -102,3 +104,14 @@ def spin():
         winnings += check_scatters(screen)
 
         return (screen, winnings, wins)
+
+def score_line(symbols):
+    payout = 0
+    target = next((s for s in symbols if s != "🃏"), "🃏")
+
+    matches = check_matches(symbols, target)
+    
+    if matches >= 3:    
+        payout = lines_payouts.get(matches, 0) * symbols_multiplier.get(target, 0)
+    
+    return (matches, target, payout)

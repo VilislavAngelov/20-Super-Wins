@@ -130,4 +130,4 @@ Then came the part that took the longest, making it feel like a slot machine. I 
     [ ] Rate limit /spin on the server so it can't be spammed.
     [ ] Move the sessions out of a dict and into a database.
     [ ] Refactor into classes.
-    [ ] Be able to spin with spacebar.
+    [X] Be able to spin with spacebar.
