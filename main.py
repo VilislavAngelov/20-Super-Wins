@@ -1,16 +1,15 @@
-# imports from various libraries. 
-from slot_engine import spin, symbols_multiplier
+from slot_machine import SlotMachine
 from fastapi import FastAPI, Request, Response, HTTPException
-from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import uuid
 from pydantic import BaseModel
+from player import Player
 
 allowed_bets = (10, 20, 40, 80, 120)
 states = {}
 app = FastAPI()
-slot_symbols = list(symbols_multiplier.keys())
+machine = SlotMachine()
 
 start_screen = [
             ["🍉", "🍉", "🍉"],   # reel 0
@@ -64,19 +63,19 @@ async def spin_json(request: Request):
         if player["balance"] < player["bet_size"]:
             raise HTTPException(status_code=402, detail="not enough balance")
         else:
-            screen, winnings, wins = spin()
+            result = machine.spin()
             player["spin_balance"] = player["balance"] - player["bet_size"]
-            player["balance"] = (player["balance"] - player["bet_size"]) + winnings
-            if winnings > 0:
-                player["last_win"] = winnings
-            player["screen"] = screen
+            player["balance"] = (player["balance"] - player["bet_size"]) + result.winnings
+            if result.winnings > 0:
+                player["last_win"] = result.winnings
+            player["screen"] = result.screen
             outcome = {
-                    "screen": screen,
-                    "winnings": winnings,
+                    "screen": result.screen,
+                    "winnings": result.winnings,
                     "balance": player["balance"],
                     "last_win": player["last_win"],
                     "spin_balance": player["spin_balance"],
-                    "wins": wins
+                    "wins": result.wins
             }
         return outcome
     else:

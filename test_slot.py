@@ -1,6 +1,8 @@
 import pytest
-from slot_engine import spin, check_lines, check_scatters , score_line
+from slot_machine import SlotMachine
 from hypothesis import given, strategies as st
+
+machine = SlotMachine()
 
 allowed_symbols = ["🍒", "🍊", "🍉", "🍇", "👑", "🃏"]
 
@@ -11,7 +13,7 @@ screen_strategy = st.lists(reel_strategy, min_size=5, max_size=5)
 def test_payout_boundaries(screen):
     starting_balance = 1000
     
-    wins, winnings = check_lines(screen)
+    wins, winnings = machine._check_lines(screen)
     actual_balance = starting_balance + winnings
     
     # the function should always retun an integer
@@ -73,7 +75,7 @@ def test_check_wins(symbols, balance, expected_balance):
 
     print(symbols)
 
-    matches, target, payout = score_line(symbols)
+    matches, target, payout = machine._score_line(symbols)
 
     flat_screen = [symbol for col in symbols for symbol in col]
     scatter_count = flat_screen.count("⭐")
@@ -93,7 +95,7 @@ def test_rtp():
 
         total_bets += bet_size
 
-        screen , winnings , wins = spin()
+        winnings = machine.spin().winnings
 
         total_wins += winnings
 
