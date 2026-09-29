@@ -2,22 +2,12 @@ from slot_machine import SlotMachine
 from fastapi import FastAPI, Request, Response, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import uuid
 from pydantic import BaseModel
-from player import Player
+from player import Player, NotEnoughBalance, BetNotAllowed
 
-allowed_bets = (10, 20, 40, 80, 120)
-states = {}
+players = {}
 app = FastAPI()
 machine = SlotMachine()
-
-start_screen = [
-            ["🍉", "🍉", "🍉"],   # reel 0
-            ["🍇", "🍇", "🍇"],   # reel 1
-            ["🍋", "🍋", "🍋"],   # reel 2
-            ["🍊", "🍊", "🍊"],   # reel 3
-            ["🍒", "🍒", "🍒"],
-        ]
 
 # serves the css/js/image files from the static/ folder.
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -30,73 +20,68 @@ class Bet(BaseModel):
 
 def get_or_create_player(player_id):
 
-    if player_id in states:
-        return player_id, states[player_id]
+    if player_id in players:
+        return players[player_id]
     else:
-        player_id = str(uuid.uuid4())
-        states[player_id] = {}
-        states[player_id]["balance"] = 1000
-        states[player_id]["bet_size"] = 40
-        states[player_id]["last_win"] = 0
-        states[player_id]["screen"] = start_screen
+        player = Player.make_player()
+        players[player.id] = player
         
-    return player_id, states[player_id]
+    return player
 
 # when a GET request hits "/", FastAPI calls home(Request) and hands you the request object which is the home.html as a response
 @app.get("/")
 async def home(request: Request):
     player_id = request.cookies.get("player_id")
-    player_id, player_state = get_or_create_player(player_id)
+    player = get_or_create_player(player_id)
     template_response = templates.TemplateResponse(
-        request=request, name="home.html", context={"name": "Leetcode1337", "screen": player_state["screen"]}
+        request=request, name="home.html", context={"name": "Leetcode1337", "screen": player.screen}
     )
-    template_response.set_cookie(key="player_id", value=player_id)
+    template_response.set_cookie(key="player_id", value=player.id)
     return template_response
 
-# GET request hits "/spin", FastAPI calls spin_json(Request) and we check if the player already has a cookie set. This is the current way of identification. If they are present in the dict states, we assing them their balance , last bet_size and last win. then we call spin and display the results to the user 
-#TODO add the last screen they have seen to the state
+# POST request hits "/spin", FastAPI calls spin_json(Request) and we check if the player already has a cookie set. This is the current way of identification. If they are present in the dict players, we try a spin display the results to the user 
 @app.post("/spin")
 async def spin_json(request: Request):
     player_id = request.cookies.get("player_id")
-    if player_id in states:
-        player = states[player_id]
-        if player["balance"] < player["bet_size"]:
-            raise HTTPException(status_code=402, detail="not enough balance")
-        else:
+    if player_id in players:
+        player = players[player_id]
+        try: 
+            player.pay_bet()
+            spin_balance = player.balance
             result = machine.spin()
-            player["spin_balance"] = player["balance"] - player["bet_size"]
-            player["balance"] = (player["balance"] - player["bet_size"]) + result.winnings
-            if result.winnings > 0:
-                player["last_win"] = result.winnings
-            player["screen"] = result.screen
+            player.collect_wins(result.winnings)
+            player.screen = result.screen
             outcome = {
-                    "screen": result.screen,
-                    "winnings": result.winnings,
-                    "balance": player["balance"],
-                    "last_win": player["last_win"],
-                    "spin_balance": player["spin_balance"],
-                    "wins": result.wins
+                "screen": result.screen,
+                "winnings": result.winnings,
+                "balance": player.balance,
+                "last_win": player.last_win,
+                "spin_balance": spin_balance,
+                "wins": result.wins
             }
-        return outcome
+            return outcome
+        except NotEnoughBalance:
+            raise HTTPException(status_code=402, detail="not enough balance")
+        
     else:
         raise HTTPException(status_code=401, detail="No player session found")
 
-# Checks if player the player cookie is in the existing dict and if not it creates a new user id , assigns the baseline balance and bet size and saves the uid as a cookie and returns the cookie 
+# Gets the player's cookie whether that's an actual cookie or None and calls get_or_create_player. After that it sets or re-sets the right cookie and returns the players balance and last win. 
 @app.get("/state")
 async def get_state(request: Request, response: Response):
     player_id = request.cookies.get("player_id")
-    player_id, player_state = get_or_create_player(player_id)
-    response.set_cookie(key="player_id", value=player_id)
-    return  player_state
+    player = get_or_create_player(player_id)
+    response.set_cookie(key="player_id", value=player.id)
+    return {"balance": player.balance, "last_win": player.last_win}
 
 # Resets the balance to the baseline
 @app.post("/reset-balance")
 async def reset_balance(request: Request):
     player_id = request.cookies.get("player_id")
-    if player_id in states:
-        states[player_id]["balance"] = 1000
+    if player_id in players:
+        players[player_id].reset_balance()
     
-        return  states[player_id]["balance"]
+        return  players[player_id].balance
     else:
         raise HTTPException(status_code=401, detail="No player session found")
 
@@ -104,11 +89,12 @@ async def reset_balance(request: Request):
 @app.post("/bet")
 async def bet(bet_size: Bet, request: Request):
     player_id = request.cookies.get("player_id")
-    if player_id in states:
-        if bet_size.bet_size in allowed_bets:
-            states[player_id]["bet_size"] = bet_size.bet_size
-            return bet_size.bet_size
-        else:
+    if player_id in players:
+        try:
+            player = players[player_id]
+            player.change_bet_size(bet_size.bet_size)
+            return player.bet_size
+        except BetNotAllowed:
             raise HTTPException(status_code=400, detail="Bet not allowed")
     else:
         raise HTTPException(status_code=401, detail="No player session found")
