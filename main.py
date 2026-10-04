@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from player import Player, NotEnoughBalance, BetNotAllowed
+from db import SessionLocal
 
 players = {}
 app = FastAPI()
@@ -18,30 +19,33 @@ templates = Jinja2Templates(directory="templates")
 class Bet(BaseModel):
     bet_size: int
 
-def get_or_create_player(player_id):
+def get_or_create_player(player_id, session):
 
     if player_id in players:
         return players[player_id]
     else:
         player = Player.make_player()
+        session.add(player)
         players[player.id] = player
         
     return player
 
 # when a GET request hits "/", FastAPI calls home(Request) and hands you the request object which is the home.html as a response
 @app.get("/")
-async def home(request: Request):
-    player_id = request.cookies.get("player_id")
-    player = get_or_create_player(player_id)
-    template_response = templates.TemplateResponse(
-        request=request, name="home.html", context={"name": "Leetcode1337", "screen": player.screen}
-    )
-    template_response.set_cookie(key="player_id", value=player.id)
-    return template_response
+def home(request: Request):
+    with SessionLocal() as session:
+        player_id = request.cookies.get("player_id")
+        player = get_or_create_player(player_id, session)
+        template_response = templates.TemplateResponse(
+            request=request, name="home.html", context={"name": "Leetcode1337", "screen": player.screen}
+        )
+        template_response.set_cookie(key="player_id", value=player.id)
+        session.commit()
+        return template_response
 
 # POST request hits "/spin", FastAPI calls spin_json(Request) and we check if the player already has a cookie set. This is the current way of identification. If they are present in the dict players, we try a spin display the results to the user 
 @app.post("/spin")
-async def spin_json(request: Request):
+def spin_json(request: Request):
     player_id = request.cookies.get("player_id")
     if player_id in players:
         player = players[player_id]
@@ -68,15 +72,17 @@ async def spin_json(request: Request):
 
 # Gets the player's cookie whether that's an actual cookie or None and calls get_or_create_player. After that it sets or re-sets the right cookie and returns the players balance and last win. 
 @app.get("/state")
-async def get_state(request: Request, response: Response):
-    player_id = request.cookies.get("player_id")
-    player = get_or_create_player(player_id)
-    response.set_cookie(key="player_id", value=player.id)
-    return {"balance": player.balance, "last_win": player.last_win}
+def get_state(request: Request, response: Response):
+    with SessionLocal() as session:
+        player_id = request.cookies.get("player_id")
+        player = get_or_create_player(player_id, session)
+        response.set_cookie(key="player_id", value=player.id)
+        session.commit()
+        return {"balance": player.balance, "last_win": player.last_win}
 
 # Resets the balance to the baseline
 @app.post("/reset-balance")
-async def reset_balance(request: Request):
+def reset_balance(request: Request):
     player_id = request.cookies.get("player_id")
     if player_id in players:
         players[player_id].reset_balance()
@@ -87,7 +93,7 @@ async def reset_balance(request: Request):
 
 # Player selects a bet amount 
 @app.post("/bet")
-async def bet(bet_size: Bet, request: Request):
+def bet(bet_size: Bet, request: Request):
     player_id = request.cookies.get("player_id")
     if player_id in players:
         try:
@@ -98,3 +104,4 @@ async def bet(bet_size: Bet, request: Request):
             raise HTTPException(status_code=400, detail="Bet not allowed")
     else:
         raise HTTPException(status_code=401, detail="No player session found")
+

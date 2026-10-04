@@ -1,4 +1,7 @@
 import uuid
+from db import Base
+from sqlalchemy import Column, String, Integer
+from sqlalchemy.dialects.postgresql import JSONB
 
 class PlayerError(Exception):
     """Base class for every player rule being broken"""
@@ -9,11 +12,18 @@ class NotEnoughBalance(PlayerError):
 class BetNotAllowed(PlayerError):
     pass
 
-class Player():
+class Player(Base):
+    __tablename__ = 'players'
+    player_id = Column('id', String, primary_key=True, nullable=False)
+    balance = Column(Integer, nullable=False)
+    bet_size = Column(Integer, nullable=False)
+    last_win = Column(Integer, nullable=False)
+    screen = Column(JSONB, nullable=False)
+
 
     start_balance = 1000
     start_bet = 40
-    last_win = 0
+    start_win = 0
     allowed_bets = (10, 20, 40, 80, 120)
     start_screen = [
             ["🍉", "🍉", "🍉"],
@@ -23,16 +33,9 @@ class Player():
             ["🍒", "🍒", "🍒"],
         ]
 
-    def __init__(self, id: str, balance: int, bet_size: int, last_win: int, screen: list[list[str]]):
-        self._id = id
-        self.balance = balance
-        self.bet_size = bet_size
-        self.last_win = last_win
-        self.screen = screen
-
     @classmethod
     def make_player(cls) -> Player:
-        return cls(id = str(uuid.uuid4()), balance = cls.start_balance, bet_size = cls.start_bet, last_win = cls.last_win, screen = cls.start_screen)
+        return cls(player_id = str(uuid.uuid4()), balance = cls.start_balance, bet_size = cls.start_bet, last_win = cls.start_win, screen = cls.start_screen)
 
     def pay_bet(self):
         if self.bet_size > self.balance:
@@ -54,4 +57,4 @@ class Player():
 
     @property
     def id(self):
-        return self._id
+        return self.player_id
