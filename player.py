@@ -2,6 +2,7 @@ import uuid
 from db import Base
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import relationship
 
 class PlayerError(Exception):
     """Base class for every player rule being broken"""
@@ -20,6 +21,7 @@ class Player(Base):
     last_win = Column(Integer, nullable=False)
     screen = Column(JSONB, nullable=False)
 
+    spins = relationship('Spin', back_populates='player') 
 
     start_balance = 1000
     start_bet = 40

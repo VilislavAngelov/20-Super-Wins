@@ -1,4 +1,4 @@
 from db import Base, engine
-import player
+import player, spin
 
 Base.metadata.create_all(engine)

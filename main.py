@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from player import Player, NotEnoughBalance, BetNotAllowed
+from spin import Spin
 from db import SessionLocal
 
 app = FastAPI()
@@ -71,6 +72,7 @@ def spin_json(request: Request):
                 "spin_balance": spin_balance,
                 "wins": result.wins
             }
+            player.spins.append(Spin(screen=result.screen, winnings=result.winnings, cost=player.bet_size))
             session.commit()
             return outcome
         except NotEnoughBalance:
