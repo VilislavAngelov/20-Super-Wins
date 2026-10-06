@@ -107,7 +107,7 @@ def reset_balance(request: Request):
 @app.post("/bet")
 def bet(bet_size: Bet, request: Request):
     with SessionLocal() as session:
-        player_id = get_player_id(request)
+        player_id = get_player_id(request)     
         player = get_player(player_id, session)
 
         if player is None:
@@ -120,3 +120,23 @@ def bet(bet_size: Bet, request: Request):
         except BetNotAllowed:
             raise HTTPException(status_code=400, detail="Bet not allowed")
 
+@app.get("/history")
+def latest_spins(request: Request):
+    with SessionLocal() as session:
+        player_id = get_player_id(request)
+        player = get_player(player_id, session)
+
+        if player is None:
+            raise HTTPException(status_code=401, detail="No player session found")
+        
+        spins = (
+            session.query(Spin)
+            .filter(Spin.player_id == player_id)
+            .order_by(Spin.spin_id.desc())
+            .limit(100)
+            .all()
+        )
+        return [
+            {"screen": s.screen, "winnings": s.winnings, "cost": s.cost, "at": s.timestamp}
+            for s in spins
+        ]
