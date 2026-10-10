@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from player import Player, NotEnoughBalance, BetNotAllowed
 from spin import Spin
 from db import SessionLocal
+from services import CasinoService, PlayerNotFound
 
 app = FastAPI()
 machine = SlotMachine()
@@ -53,30 +54,15 @@ def home(request: Request):
 def spin_json(request: Request):
     with SessionLocal() as session:
         player_id = get_player_id(request)
-        player = get_player(player_id, session)
-        
-        if player is None:
+        slot = CasinoService(session, machine)
+
+        try:
+            outcome = slot.spin(player_id)
+        except PlayerNotFound:
             raise HTTPException(status_code=401, detail="No player session found")
-        
-        try: 
-            player.pay_bet()
-            spin_balance = player.balance
-            result = machine.spin()
-            player.collect_wins(result.winnings)
-            player.screen = result.screen
-            outcome = {
-                "screen": result.screen,
-                "winnings": result.winnings,
-                "balance": player.balance,
-                "last_win": player.last_win,
-                "spin_balance": spin_balance,
-                "wins": result.wins
-            }
-            player.spins.append(Spin(screen=result.screen, winnings=result.winnings, cost=player.bet_size))
-            session.commit()
-            return outcome
         except NotEnoughBalance:
-            raise HTTPException(status_code=402, detail="not enough balance")
+            raise HTTPException(status_code=402, detail="Not enough balance")
+        return outcome
             
 
 # Gets the player's cookie whether that's an actual cookie or None and calls get_or_create_player. After that it sets or re-sets the right cookie and returns the players balance and last win. 
