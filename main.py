@@ -3,8 +3,7 @@ from fastapi import FastAPI, Request, Response, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from player import Player, NotEnoughBalance, BetNotAllowed
-from spin import Spin
+from player import NotEnoughBalance, BetNotAllowed
 from db import SessionLocal
 from services import CasinoService, PlayerNotFound
 
@@ -24,29 +23,18 @@ def get_player_id(request: Request):
     player_id = request.cookies.get("player_id")
     return player_id
 
-def get_player(player_id, session):
-    player = session.get(Player, player_id) if player_id else None
-    return player
-
-def get_or_create_player(player_id, session):
-    player = get_player(player_id, session)
-    if player is None:
-        player = Player.make_player()
-        session.add(player)
-        
-    return player
-
 # when a GET request hits "/", FastAPI calls home(Request) and hands you the request object which is the home.html as a response
 @app.get("/")
 def home(request: Request):
     with SessionLocal() as session:
         player_id = get_player_id(request)
-        player = get_or_create_player(player_id, session)
+        casino = CasinoService(session, machine)
+        player = casino.get_or_create_player(player_id)
         template_response = templates.TemplateResponse(
             request=request, name="home.html", context={"name": "Leetcode1337", "screen": player.screen}
         )
         template_response.set_cookie(key="player_id", value=player.id)
-        session.commit()
+
         return template_response
 
 # POST request hits "/spin", FastAPI calls spin_json(Request) and we check if the player already has a cookie set. This is the current way of identification. If they are present in the players table, we try a spin display the results to the user 
@@ -70,9 +58,10 @@ def spin_json(request: Request):
 def get_state(request: Request, response: Response):
     with SessionLocal() as session:
         player_id = get_player_id(request)
-        player = get_or_create_player(player_id, session)
+        casino = CasinoService(session, machine)
+        player = casino.get_or_create_player(player_id)
         response.set_cookie(key="player_id", value=player.id)
-        session.commit()
+        
         return {"balance": player.balance, "last_win": player.last_win}
 
 # Resets the balance to the baseline
@@ -80,49 +69,39 @@ def get_state(request: Request, response: Response):
 def reset_balance(request: Request):
     with SessionLocal() as session:
         player_id = get_player_id(request)
-        player = get_player(player_id, session)
+        casino = CasinoService(session, machine)
 
-        if player is None:
+        try:
+            balance = casino.player_reset_balance(player_id)
+        except PlayerNotFound:
             raise HTTPException(status_code=401, detail="No player session found")
 
-        player.reset_balance()
-        session.commit()
-        return player.balance
+        return balance
 
 # Player selects a bet amount 
 @app.post("/bet")
 def bet(bet_size: Bet, request: Request):
     with SessionLocal() as session:
         player_id = get_player_id(request)     
-        player = get_player(player_id, session)
+        casino = CasinoService(session, machine)
 
-        if player is None:
-            raise HTTPException(status_code=401, detail="No player session found")
         try:
-            player.change_bet_size(bet_size.bet_size)
-            session.commit()
-            return player.bet_size
-        
+            player_bet = casino.player_change_bet(player_id, bet_size.bet_size)
+        except PlayerNotFound:
+            raise HTTPException(status_code=401, detail="No player session found")
         except BetNotAllowed:
             raise HTTPException(status_code=400, detail="Bet not allowed")
+
+        return player_bet
 
 @app.get("/history")
 def latest_spins(request: Request):
     with SessionLocal() as session:
         player_id = get_player_id(request)
-        player = get_player(player_id, session)
+        casino = CasinoService(session, machine)
 
-        if player is None:
+        try:
+            return casino.player_history(player_id)
+        except PlayerNotFound:
             raise HTTPException(status_code=401, detail="No player session found")
         
-        spins = (
-            session.query(Spin)
-            .filter(Spin.player_id == player_id)
-            .order_by(Spin.spin_id.desc())
-            .limit(100)
-            .all()
-        )
-        return [
-            {"screen": s.screen, "winnings": s.winnings, "cost": s.cost, "at": s.timestamp}
-            for s in spins
-        ]
