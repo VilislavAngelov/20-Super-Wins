@@ -5,13 +5,16 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
 class PlayerError(Exception):
-    """Base class for every player rule being broken"""
+    status_code = 400
+    detail = "Something went wrong"
 
 class NotEnoughBalance(PlayerError):
-    pass
+    status_code = 402
+    detail = "Not enough balance"
 
 class BetNotAllowed(PlayerError):
-    pass
+    status_code = 400
+    detail = "Bet not allowed"
 
 class Player(Base):
     __tablename__ = 'players'

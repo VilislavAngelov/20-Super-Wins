@@ -2,10 +2,9 @@ from player import Player, PlayerError
 from dataclasses import dataclass
 from spin import Spin
 
-
-
 class PlayerNotFound(PlayerError):
-    pass
+    status_code = 401
+    detail = "No player session found"
 
 @dataclass
 class Outcome:

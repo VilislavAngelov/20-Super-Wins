@@ -1,107 +1,70 @@
 from slot_machine import SlotMachine
-from fastapi import FastAPI, Request, Response, HTTPException
+from fastapi import FastAPI, Request, Response, Depends, Cookie
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from player import NotEnoughBalance, BetNotAllowed
-from db import SessionLocal
-from services import CasinoService, PlayerNotFound
+from player import PlayerError
+from db import get_session
+from services import CasinoService
+from typing import Annotated
 
 app = FastAPI()
 machine = SlotMachine()
 
-# serves the css/js/image files from the static/ folder.
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# templating engine, in other words enables you to put dynamic values in the html ex. a python variable
 templates = Jinja2Templates(directory="templates")
 
 class Bet(BaseModel):
     bet_size: int
 
-def get_player_id(request: Request):
-    player_id = request.cookies.get("player_id")
-    return player_id
+def get_casino(session=Depends(get_session)):
+    return CasinoService(session, machine)
 
-# when a GET request hits "/", FastAPI calls home(Request) and hands you the request object which is the home.html as a response
+Casino = Annotated[CasinoService, Depends(get_casino)]
+PlayerId = Annotated[str | None, Cookie()]
+
+@app.exception_handler(PlayerError)
+def player_error(request: Request, exc: PlayerError):
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
 @app.get("/")
-def home(request: Request):
-    with SessionLocal() as session:
-        player_id = get_player_id(request)
-        casino = CasinoService(session, machine)
-        player = casino.get_or_create_player(player_id)
-        template_response = templates.TemplateResponse(
-            request=request, name="home.html", context={"name": "Leetcode1337", "screen": player.screen}
-        )
-        template_response.set_cookie(key="player_id", value=player.id)
+def home(casino: Casino, request: Request, player_id: PlayerId = None):
+    player = casino.get_or_create_player(player_id)
+    template_response = templates.TemplateResponse(
+        request=request, name="home.html", context={"name": "Leetcode1337", "screen": player.screen}
+    )
+    template_response.set_cookie(key="player_id", value=player.id)
 
-        return template_response
+    return template_response
 
-# POST request hits "/spin", FastAPI calls spin_json(Request) and we check if the player already has a cookie set. This is the current way of identification. If they are present in the players table, we try a spin display the results to the user 
 @app.post("/spin")
-def spin_json(request: Request):
-    with SessionLocal() as session:
-        player_id = get_player_id(request)
-        slot = CasinoService(session, machine)
+def spin_json(casino: Casino, player_id: PlayerId = None):
 
-        try:
-            outcome = slot.spin(player_id)
-        except PlayerNotFound:
-            raise HTTPException(status_code=401, detail="No player session found")
-        except NotEnoughBalance:
-            raise HTTPException(status_code=402, detail="Not enough balance")
-        return outcome
-            
-
-# Gets the player's cookie whether that's an actual cookie or None and calls get_or_create_player. After that it sets or re-sets the right cookie and returns the players balance and last win. 
+    return casino.spin(player_id)
+    
 @app.get("/state")
-def get_state(request: Request, response: Response):
-    with SessionLocal() as session:
-        player_id = get_player_id(request)
-        casino = CasinoService(session, machine)
-        player = casino.get_or_create_player(player_id)
-        response.set_cookie(key="player_id", value=player.id)
-        
-        return {"balance": player.balance, "last_win": player.last_win}
+def get_state(casino: Casino, response: Response, player_id: PlayerId = None):
+    player = casino.get_or_create_player(player_id)
+    response.set_cookie(key="player_id", value=player.id)
+    
+    return {"balance": player.balance, "last_win": player.last_win}
 
-# Resets the balance to the baseline
 @app.post("/reset-balance")
-def reset_balance(request: Request):
-    with SessionLocal() as session:
-        player_id = get_player_id(request)
-        casino = CasinoService(session, machine)
+def reset_balance(casino: Casino, player_id: PlayerId = None):
+    balance = casino.player_reset_balance(player_id)
 
-        try:
-            balance = casino.player_reset_balance(player_id)
-        except PlayerNotFound:
-            raise HTTPException(status_code=401, detail="No player session found")
+    return balance
 
-        return balance
-
-# Player selects a bet amount 
 @app.post("/bet")
-def bet(bet_size: Bet, request: Request):
-    with SessionLocal() as session:
-        player_id = get_player_id(request)     
-        casino = CasinoService(session, machine)
+def bet(casino: Casino, bet_size: Bet, player_id: PlayerId = None):
+    player_bet = casino.player_change_bet(player_id, bet_size.bet_size)
 
-        try:
-            player_bet = casino.player_change_bet(player_id, bet_size.bet_size)
-        except PlayerNotFound:
-            raise HTTPException(status_code=401, detail="No player session found")
-        except BetNotAllowed:
-            raise HTTPException(status_code=400, detail="Bet not allowed")
-
-        return player_bet
+    return player_bet
 
 @app.get("/history")
-def latest_spins(request: Request):
-    with SessionLocal() as session:
-        player_id = get_player_id(request)
-        casino = CasinoService(session, machine)
-
-        try:
-            return casino.player_history(player_id)
-        except PlayerNotFound:
-            raise HTTPException(status_code=401, detail="No player session found")
-        
+def latest_spins(casino: Casino, player_id: PlayerId = None):
+    
+    return casino.player_history(player_id)
+    
