@@ -13,13 +13,11 @@
         <div class="game">
             <div id="screen">
                 {% for reel in screen %}
-                    <div class="reel"">
+                    <div class="reel">
                         <div class="strip">
+                            <div class="symbol">{{ reel[1] }}</div>
                             {% for symbol in reel %}
-                                <div class="symbol" data-row="{{ symbol }}">{{ symbol }}</div>
-                            {% endfor %}
-                            {% for symbol in reel %}
-                                <div class="symbol" data-row="{{ symbol }}">{{ symbol }}</div>
+                                <div class="symbol">{{ symbol }}</div>
                             {% endfor %}
                         </div>
                     </div>

@@ -3,36 +3,115 @@ const stop_button = document.getElementById("stop-button");
 const balance = document.getElementById("balance");
 const winnings = document.getElementById("winnings");
 const strips = document.querySelectorAll(".strip");
-const reels = document.querySelectorAll(".reel");
-const bet_select = document.getElementById("bet-select");
 const reset_balance = document.getElementById("reset-balance");
 const SYMBOLS = ["🍋", "🍒", "🍊", "🍉", "🍇", "👑", "🃏", "⭐"];
+const SYMBOL_HEIGHT = 100
+const SPEED = 1
+const OVERSHOOT = 30
+const BOUNCE_MS = 120
+const FIRST = 2
+const GAP = 3
+const COUNT_UP_MS = 2000;
+const reels = [];
 
 let bet_buttons = document.getElementsByClassName("bet-amount");
-let landing_sound0 = new Audio("/static/sounds/land.wav");
-let landing_sound1 = new Audio("/static/sounds/land.wav");
-let landing_sound2 = new Audio("/static/sounds/land.wav");
-let landing_sound3 = new Audio("/static/sounds/land.wav");
-let landing_sound4 = new Audio("/static/sounds/land.wav");
-let landing_sounds = [
-	landing_sound0,
-	landing_sound1,
-	landing_sound2,
-	landing_sound3,
-	landing_sound4,
-];
-let interval = 2000;
 let spin_result = null;
-let animations = [];
-let landings = [];
-let last_lap = [0, 0, 0, 0, 0];
 let spin_data = null;
-let laps_after_result = [0, 0, 0, 0, 0];
 let stopping = false;
 let landed = 0;
 let show_index = 0;
 let win_timer = null;
 let spin_state = "IDLE";
+
+strips.forEach((strip, index) => {
+	reels.push({
+		index: index,
+		strip: strip,
+		tiles: [...strip.querySelectorAll(".symbol")],
+		y: 0,
+		state: "IDLE",
+		queue: [],
+		steps: 0,
+		bounceStart: 0,
+		landing_sound: new Audio("/static/sounds/land.wav"),
+	});
+});
+
+function random_symbol() {
+	return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+}
+
+function draw(reel) {
+	reel.strip.style.transform = `translateY(${reel.y - SYMBOL_HEIGHT}px)`;
+}
+
+function shiftDown(reel) {
+	for (let i = 3; i > 0; i--) {
+		reel.tiles[i].textContent = reel.tiles[i-1].textContent
+	}
+
+	if (reel.queue.length > 0) {
+		reel.tiles[0].textContent = reel.queue.shift();
+	} else {
+		reel.tiles[0].textContent = random_symbol();
+	}
+
+	reel.steps++;
+}
+
+let last = performance.now()
+function frame(now) {
+	const dt = Math.min(now - last, 50)
+	last = now
+	for (const reel of reels) update(reel, now, dt);
+	requestAnimationFrame(frame)
+}
+
+function update(reel, now, dt) {
+	if (reel.state === "SPINNING" || reel.state === "LAND" || reel.state === "OVERSHOOT") {
+		reel.y += SPEED * dt
+	}
+	while (reel.y >= SYMBOL_HEIGHT && reel.state !== "OVERSHOOT") {
+		reel.y -= SYMBOL_HEIGHT
+		shiftDown(reel)
+		if (reel.state === "LAND" && reel.queue.length === 0) {
+			reel.state = "OVERSHOOT"
+		}
+	}
+	if (reel.state === "OVERSHOOT" && reel.y >= OVERSHOOT) {
+		reel.y = OVERSHOOT
+		reel.landing_sound.currentTime = 0;
+		reel.landing_sound.play().catch(() => {});
+		reel.state = "BOUNCE"
+		reel.bounceStart = now
+	}
+	if(reel.state === "BOUNCE") {
+		const t = Math.min((now - reel.bounceStart) / BOUNCE_MS, 1)
+		reel.y = OVERSHOOT * (1 - t) ** 3
+		if (t === 1) {
+			reel.state = "IDLE"
+
+			landed++;
+			if (landed === reels.length) {
+				display_wins();
+
+				if (spin_data.wins.length > 0) {
+					win_timer = setInterval(show_next_win, 300);
+				}
+			}
+		}
+	}
+	if (reel.state === "SPINNING" && spin_result !== null && (stopping || reel.steps >= FIRST + reel.index * GAP)) {
+		startLanding(reel)
+	}
+	draw(reel)	
+}
+
+function startLanding(reel) {
+	const column = spin_result[reel.index]
+	reel.queue = [column[2], column[1], column[0], random_symbol()]
+	reel.state = "LAND"
+}
 
 async function loadState() {
 	const response = await fetch("/state");
@@ -42,40 +121,34 @@ async function loadState() {
 	winnings.textContent = "Last Win: $" + data.last_win;
 }
 
-spin_button.addEventListener("click", async () => {
-	doSpin();
-});
+spin_button.addEventListener("click", doSpin);
 
 document.body.onkeyup = function (e) {
-	if (e.key == " " || e.code == "Space" || e.keyCode == 32) {
+	if (e.code == "Space") {
 		if (spin_state == "IDLE") {
-			change_spin_state("WAITING");
 			doSpin();
 		} else if (spin_state == "SPINNING" && spin_result !== null) {
-			stopping = true;
-			stop_button.disabled = true;
-		} else {
-			return;
+			stop_spin()
 		}
 	}
 };
 
 for (let i = 0; i < bet_buttons.length; i++) {
 	bet_buttons[i].addEventListener("click", async (e) => {
-		await fetch("/bet", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ bet_size: Number(e.target.dataset.bet) }),
-		});
-		doSpin();
+		if (spin_state == "IDLE") {
+			await fetch("/bet", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ bet_size: Number(e.target.dataset.bet) }),
+			});
+			doSpin();
+		}		
+		stop_spin()
 	});
 }
 
-stop_button.addEventListener("click", () => {
-	if (spin_result === null) return;
-	stopping = true;
-	stop_button.disabled = true;
-});
+stop_button.addEventListener("click", stop_spin);
+
 
 reset_balance.addEventListener("click", async () => {
 	const response = await fetch("/reset-balance", { method: "POST" });
@@ -85,56 +158,33 @@ reset_balance.addEventListener("click", async () => {
 });
 
 async function doSpin() {
-	spin_result = null;
-	last_lap = [0, 0, 0, 0, 0];
-	stopping = false;
-	landed = 0;
-	laps_after_result = [0, 0, 0, 0, 0];
-	show_index = 0;
-	clearInterval(win_timer);
-	clear_wins();
-	change_spin_state("WAITING");
-	spin_animation();
-	const response = await fetch("/spin", { method: "POST" });
-	const data = await response.json();
-	spin_data = data;
+	if (spin_state == "IDLE") {
+		spin_result = null;
+		stopping = false;
+		landed = 0;
+		show_index = 0;
+		clearInterval(win_timer);
+		clear_wins();
+		change_spin_state("WAITING");
+		for (const reel of reels) reel.state = "SPINNING";
+		const response = await fetch("/spin", { method: "POST" });
+		const data = await response.json();
+		spin_data = data;
 
-	if (response.ok) {
-		change_spin_state("SPINNING");
-		balance.textContent = "Balance: $" + data.spin_balance;
+		if (response.ok) {
+			change_spin_state("SPINNING");
+			balance.textContent = "Balance: $" + data.spin_balance;
 
-		spin_result = data.screen;
+			spin_result = data.screen;
+			for (const reel of reels) reel.steps = 0
+		}
 	}
 }
 
-function spin_animation() {
-	strips.forEach((strip, reel) => {
-		const symbols = strip.querySelectorAll(".symbol");
-		const tiles = symbols.length - 3;
-		const travel = tiles * symbols[0].offsetHeight;
-
-		for (let i = 0; i < symbols.length - 3; i++) {
-			symbols[i].textContent =
-				SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-		}
-
-		animations[reel] = strip.animate(
-			[
-				{ transform: `translateY(-${travel}px)` },
-				{ transform: "translateY(0)" },
-			],
-			{
-				duration: travel,
-				iterations: Infinity,
-			},
-		);
-	});
-}
-
-function value() {
+function count_up_winnings() {
 	let startValue = 0,
 		endValue = spin_data.winnings,
-		duration = Math.floor(interval / endValue);
+		duration = Math.floor(COUNT_UP_MS / endValue);
 	let counter = setInterval(function () {
 		startValue += 1;
 		winnings.textContent = "Winnings: $" + startValue;
@@ -147,12 +197,11 @@ function value() {
 function display_wins() {
 	change_spin_state("IDLE");
 	if (spin_data.winnings > 0) {
-		value();
-		balance.textContent = "Balance: $" + spin_data.balance;
+		count_up_winnings();
 	} else {
 		winnings.textContent = "Last Win: $" + spin_data.last_win;
-		balance.textContent = "Balance: $" + spin_data.balance;
 	}
+	balance.textContent = "Balance: $" + spin_data.balance;
 }
 
 function clear_wins() {
@@ -163,7 +212,7 @@ function clear_wins() {
 
 function light_wins(i) {
 	for (const [reel, row] of spin_data.wins[i].cells) {
-		strips[reel].querySelectorAll(".symbol")[row].classList.add("lit");
+		reels[reel].tiles[row+1].classList.add("lit");
 	}
 }
 
@@ -182,99 +231,20 @@ function show_next_win() {
 }
 
 function change_spin_state(new_state) {
-	switch (new_state) {
-		case "IDLE":
-			spin_state = "IDLE";
-			spin_button.disabled = false;
-			spin_button.style.display = "block";
-			stop_button.disabled = true;
-			stop_button.style.display = "none";
-			break;
-		case "WAITING":
-			spin_state = "WAITING";
-			spin_button.disabled = true;
-			spin_button.style.display = "none";
-			stop_button.disabled = true;
-			stop_button.style.display = "none";
-			break;
-		case "SPINNING":
-			spin_state = "SPINNING";
-			spin_button.disabled = true;
-			spin_button.style.display = "none";
-			stop_button.disabled = false;
-			stop_button.style.display = "block";
-			break;
-	}
+	spin_state = new_state
+
+	spin_button.disabled = new_state !== "IDLE"
+	stop_button.disabled = new_state !== "SPINNING"
+	reset_balance.disabled = new_state !== "IDLE"
+	spin_button.style.display = new_state === "IDLE" ? "block" : "none"
+	stop_button.style.display = new_state === "SPINNING" ? "block" : "none"
 }
 
-function land(reel) {
-	const strip = strips[reel];
-	const symbols = strip.querySelectorAll(".symbol");
-	const travel = (symbols.length - 3) * symbols[0].offsetHeight;
-
-	animations[reel].cancel();
-
-	landings[reel] = strip.animate(
-		[
-			{ transform: `translateY(-${travel}px)` },
-			{ transform: "translateY(0)" },
-		],
-		{ duration: travel, easing: "linear" },
-	);
-
-	landings[reel].finished.then(() => {
-		landing_sounds[reel].currentTime = 0;
-		landing_sounds[reel].play().catch(() => {});
-
-		symbols[symbols.length - 3].textContent = symbols[0].textContent;
-		symbols[symbols.length - 2].textContent = symbols[1].textContent;
-		symbols[symbols.length - 1].textContent = symbols[2].textContent;
-
-		landed++;
-		if (landed === strips.length) {
-			display_wins();
-
-			if (spin_data.wins.length > 0) {
-				win_timer = setInterval(show_next_win, 500);
-			}
-		}
-	});
-}
-
-function watch_animation() {
-	animations.forEach((animation, reel) => {
-		const symbols = strips[reel].querySelectorAll(".symbol");
-		let lap = Math.floor(
-			animation.currentTime / animation.effect.getTiming().duration,
-		);
-
-		if (animation.playState == "idle") {
-		} else if (lap !== last_lap[reel]) {
-			symbols[symbols.length - 3].textContent = symbols[0].textContent;
-			symbols[symbols.length - 2].textContent = symbols[1].textContent;
-			symbols[symbols.length - 1].textContent = symbols[2].textContent;
-
-			if (spin_result !== null) laps_after_result[reel] += 1;
-
-			if (
-				spin_result !== null &&
-				(stopping || laps_after_result[reel] > reel)
-			) {
-				for (let i = 0; i < 3; i++) {
-					symbols[i].textContent = spin_result[reel][i];
-				}
-				land(reel);
-			} else {
-				for (let i = 0; i < 3; i++) {
-					symbols[i].textContent =
-						SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-				}
-			}
-		}
-		last_lap[reel] = lap;
-	});
-	requestAnimationFrame(watch_animation);
+function stop_spin() {
+	if (spin_result === null) return;
+	stopping = true;
+	stop_button.disabled = true;
 }
 
 loadState();
-requestAnimationFrame(watch_animation);
+requestAnimationFrame(frame)
