@@ -4,6 +4,7 @@ const balance = document.getElementById("balance");
 const winnings = document.getElementById("winnings");
 const strips = document.querySelectorAll(".strip");
 const reset_balance = document.getElementById("reset-balance");
+const balance_error = document.getElementById("balance-error")
 const SYMBOLS = ["🍋", "🍒", "🍊", "🍉", "🍇", "👑", "🃏", "⭐"];
 const SYMBOL_HEIGHT = 100
 const SPEED = 1
@@ -22,6 +23,8 @@ let landed = 0;
 let show_index = 0;
 let win_timer = null;
 let spin_state = "IDLE";
+let player_balance
+let player_bet
 
 strips.forEach((strip, index) => {
 	reels.push({
@@ -117,6 +120,9 @@ async function loadState() {
 	const response = await fetch("/state");
 	const data = await response.json();
 
+	player_balance = data.balance
+	player_bet = data.bet_size
+
 	balance.textContent = "Balance: $" + data.balance;
 	winnings.textContent = "Last Win: $" + data.last_win;
 }
@@ -141,6 +147,7 @@ for (let i = 0; i < bet_buttons.length; i++) {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ bet_size: Number(e.target.dataset.bet) }),
 			});
+			player_bet = Number(e.target.dataset.bet)
 			doSpin();
 		}		
 		stop_spin()
@@ -154,11 +161,18 @@ reset_balance.addEventListener("click", async () => {
 	const response = await fetch("/reset-balance", { method: "POST" });
 	const data = await response.json();
 
+	balance_error.style.display = "none"
+	player_balance = data
 	balance.textContent = "Balance: $" + data;
 });
 
 async function doSpin() {
+	if (player_balance < player_bet) {
+		balance_error.style.display = "block"
+		return
+	}
 	if (spin_state == "IDLE") {
+		balance_error.style.display = "none"
 		spin_result = null;
 		stopping = false;
 		landed = 0;
@@ -173,6 +187,8 @@ async function doSpin() {
 
 		if (response.ok) {
 			change_spin_state("SPINNING");
+
+			player_balance = data.spin_balance
 			balance.textContent = "Balance: $" + data.spin_balance;
 
 			spin_result = data.screen;
@@ -201,6 +217,8 @@ function display_wins() {
 	} else {
 		winnings.textContent = "Last Win: $" + spin_data.last_win;
 	}
+
+	player_balance = spin_data.balance
 	balance.textContent = "Balance: $" + spin_data.balance;
 }
 

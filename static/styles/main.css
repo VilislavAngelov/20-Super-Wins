@@ -35,7 +35,7 @@ body {
     "b b b b b b c"
     "b b b b b b c"
     "b b b b b b c"
-    "b b b b b b c"
+    "d d d d d d d"
     "d d d d d d d";
 }
 
@@ -67,7 +67,6 @@ body {
 }
 
 .player-bar {
-    grid-area: d;
     display: flex;
     gap: 50px;
 }
@@ -102,4 +101,21 @@ body {
 
 .lit{
     background-color: yellow;
+}
+
+#balance-error{
+    color: white;
+    font-size: 18px;
+    display: none;
+    text-align: center;
+}
+
+.notification-bar{
+    height: 60px;
+}
+
+.controls {
+    grid-area: d;
+    display: flex;
+    flex-direction: column;
 }

@@ -49,7 +49,7 @@ def get_state(casino: Casino, response: Response, player_id: PlayerId = None):
     player = casino.get_or_create_player(player_id)
     response.set_cookie(key="player_id", value=player.id)
     
-    return {"balance": player.balance, "last_win": player.last_win}
+    return {"balance": player.balance, "last_win": player.last_win, "bet_size": player.bet_size}
 
 @app.post("/reset-balance")
 def reset_balance(casino: Casino, player_id: PlayerId = None):
