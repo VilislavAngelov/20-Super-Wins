@@ -41,7 +41,7 @@ def home(casino: Casino, request: Request, player_id: PlayerId = None):
 
 @app.post("/spin")
 def spin_json(casino: Casino, player_id: PlayerId = None):
-
+    
     return casino.spin(player_id)
     
 @app.get("/state")

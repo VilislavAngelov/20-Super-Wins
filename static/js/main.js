@@ -4,7 +4,7 @@ const balance = document.getElementById("balance");
 const winnings = document.getElementById("winnings");
 const strips = document.querySelectorAll(".strip");
 const reset_balance = document.getElementById("reset-balance");
-const balance_error = document.getElementById("balance-error")
+const player_alert = document.getElementById("player-alert")
 const SYMBOLS = ["🍋", "🍒", "🍊", "🍉", "🍇", "👑", "🃏", "⭐"];
 const SYMBOL_HEIGHT = 100
 const SPEED = 1
@@ -161,22 +161,24 @@ reset_balance.addEventListener("click", async () => {
 	const response = await fetch("/reset-balance", { method: "POST" });
 	const data = await response.json();
 
-	balance_error.style.display = "none"
+	player_alert.style.display = "none"
 	player_balance = data
 	balance.textContent = "Balance: $" + data;
 });
 
 async function doSpin() {
 	if (player_balance < player_bet) {
-		balance_error.style.display = "block"
+		player_alert.textContent = "Not enough balance" 
+		player_alert.style.display = "block"
 		return
 	}
 	if (spin_state == "IDLE") {
-		balance_error.style.display = "none"
+		player_alert.style.display = "none"
 		spin_result = null;
 		stopping = false;
 		landed = 0;
 		show_index = 0;
+		const last_screen = currentScreen()
 		clearInterval(win_timer);
 		clear_wins();
 		change_spin_state("WAITING");
@@ -193,6 +195,17 @@ async function doSpin() {
 
 			spin_result = data.screen;
 			for (const reel of reels) reel.steps = 0
+		} else {
+			reels.forEach((reel) => {
+				for (let i = 1; i <= 3; i++) {
+					reel.tiles[i].textContent = last_screen[reel.index][i-1]
+				}
+				reel.state = "IDLE"
+				reel.y = 0
+			})
+			change_spin_state("IDLE")	
+			player_alert.textContent = data.detail 
+			player_alert.style.display = "block"
 		}
 	}
 }
@@ -262,6 +275,20 @@ function stop_spin() {
 	if (spin_result === null) return;
 	stopping = true;
 	stop_button.disabled = true;
+}
+
+function currentScreen() {
+	const current_screen = []
+
+	reels.forEach((reel) => {
+		const iter_reel = []
+		for (let i = 1; i <= 3; i++) {
+			iter_reel.push(reel.tiles[i].textContent)
+		}
+		current_screen.push(iter_reel)
+	})
+
+	return current_screen
 }
 
 loadState();

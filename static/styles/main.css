@@ -103,7 +103,7 @@ body {
     background-color: yellow;
 }
 
-#balance-error{
+#player-alert{
     color: white;
     font-size: 18px;
     display: none;
