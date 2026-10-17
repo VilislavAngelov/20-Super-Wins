@@ -1,10 +1,17 @@
 from player import Player, PlayerError
 from dataclasses import dataclass
 from spin import Spin
+from datetime import datetime, timezone, timedelta
+
+SPIN_COOLDOWN = timedelta(milliseconds=500)
 
 class PlayerNotFound(PlayerError):
     status_code = 401
     detail = "No player session found"
+
+class SpinTooFast(PlayerError):
+    status_code = 429
+    detail = "Too many requests"
 
 @dataclass
 class Outcome:
@@ -38,6 +45,19 @@ class CasinoService:
     
     def spin(self, player_id):
         player = self._load_player(player_id, lock=True)
+
+        last_spin = (
+            self.session.query(Spin)
+            .filter(Spin.player_id == player_id)
+            .order_by(Spin.spin_id.desc())
+            .first()
+        )
+        
+        if last_spin is not None:
+            elapsed = datetime.now(timezone.utc) - last_spin.timestamp
+            if elapsed < SPIN_COOLDOWN:
+                raise SpinTooFast()
+
         player.pay_bet()
         spin_balance = player.balance
         result = self.machine.spin()
