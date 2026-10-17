@@ -13,7 +13,7 @@ const OVERSHOOT = 30
 const BOUNCE_MS = 120
 const FIRST = 2
 const GAP = 3
-const COUNT_UP_MS = 2000;
+const COUNT_UP_MS = 1000
 const reels = [];
 
 let bet_buttons = document.getElementsByClassName("bet-amount");
@@ -213,17 +213,21 @@ async function doSpin() {
 }
 
 function count_up_winnings() {
-	let startValue = 0,
-		endValue = spin_data.winnings,
-		duration = Math.floor(COUNT_UP_MS / endValue);
-	let counter = setInterval(function () {
-		startValue += 1;
-		winnings.textContent = "Winnings";
-		winnings_number.textContent = "$" + startValue;
-		if (startValue >= endValue) {
-			clearInterval(counter);
+
+	const endValue = spin_data.winnings
+	let start = performance.now()
+	
+	winnings.textContent = "Winnings"
+
+	function tick(now) {
+		const progress = Math.min((now - start) / COUNT_UP_MS, 1)
+		winnings_number.textContent = "$" + Math.floor(endValue * progress)
+
+		if(progress < 1) {
+			requestAnimationFrame(tick)
 		}
-	}, duration);
+	}
+	requestAnimationFrame(tick)
 }
 
 function display_wins() {

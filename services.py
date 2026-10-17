@@ -61,14 +61,15 @@ class CasinoService:
         player.pay_bet()
         spin_balance = player.balance
         result = self.machine.spin()
-        player.collect_wins(result.winnings)
+        winnings = result.winnings * player.bet_size // self.machine.BASE_BET
+        player.collect_wins(winnings)
         player.screen = result.screen
         
-        player.spins.append(Spin(screen=result.screen, winnings=result.winnings, cost=player.bet_size))
+        player.spins.append(Spin(screen=result.screen, winnings=winnings, cost=player.bet_size))
 
         self.session.commit()
 
-        return Outcome(screen=result.screen, winnings=result.winnings, balance=player.balance, last_win=player.last_win, spin_balance=spin_balance, wins=result.wins)
+        return Outcome(screen=result.screen, winnings=winnings, balance=player.balance, last_win=player.last_win, spin_balance=spin_balance, wins=result.wins)
 
     def player_reset_balance(self, player_id):
         player = self._load_player(player_id, lock=True)

@@ -20,6 +20,7 @@ class SlotMachine:
         "👑": 4,
         "🃏": 10
         }
+    BASE_BET = 10
     SCATTER_SYMBOL = "⭐"
     SCATTER_PAYOUT = 150
     PAYLINES = [   
