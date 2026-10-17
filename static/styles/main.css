@@ -7,8 +7,11 @@ body {
 }
 
 #screen {
-    grid-area: b;
     display: flex;
+}
+
+.game {
+    grid-area: b;
 }
 
 .symbol {
@@ -22,21 +25,26 @@ body {
 #balance, #winnings {
     font-size: 24px;
     color: white;
+    display: flex;
+    flex-direction: column;
+    width: 100px;
+    flex-shrink: 0;
 }
 
 .container{
-    width: 1000px;
+    width: fit-content;
+    margin: 0 auto;
     padding: 50px;
     display: grid;
     grid-auto-rows: 100px;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(6, 150px);
     grid-template-areas:
-    "a a a a a a a"
-    "b b b b b b c"
-    "b b b b b b c"
-    "b b b b b b c"
-    "d d d d d d d"
-    "d d d d d d d";
+    "a a a a a ."
+    "b b b b b c"
+    "b b b b b c"
+    "b b b b b c"
+    "d d d d d ."
+    "d d d d d .";
 }
 
 .title {
@@ -53,6 +61,7 @@ body {
     cursor: pointer;
     outline: none;
     border: none;
+    align-self: center;
 }
 
 #stop-button {
@@ -64,16 +73,16 @@ body {
     outline: none;
     border: none;
     display: none;
+    align-self: center;
 }
 
 .player-bar {
     display: flex;
-    gap: 50px;
+    gap: 20px;
 }
 
 #bet-select {
     display: flex;
-    flex: 1 1 30%;
     gap: 10px;
     width: 100%;
     justify-content: space-between;
@@ -81,7 +90,7 @@ body {
 .bet-amount {
     font-size: 22px;
     font-weight: 500;
-    padding: 10px 50px;
+    padding: 20px 30px;
     background: none;
     color: white;
     border-radius: 12px;

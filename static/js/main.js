@@ -1,7 +1,8 @@
 const spin_button = document.getElementById("spin-button");
 const stop_button = document.getElementById("stop-button");
-const balance = document.getElementById("balance");
-const winnings = document.getElementById("winnings");
+const balance = document.getElementById("balance-number");
+const winnings = document.getElementById("win-label");
+const winnings_number = document.getElementById("win-number");
 const strips = document.querySelectorAll(".strip");
 const reset_balance = document.getElementById("reset-balance");
 const player_alert = document.getElementById("player-alert")
@@ -123,8 +124,9 @@ async function loadState() {
 	player_balance = data.balance
 	player_bet = data.bet_size
 
-	balance.textContent = "Balance: $" + data.balance;
-	winnings.textContent = "Last Win: $" + data.last_win;
+	balance.textContent = "$" + data.balance;
+	winnings.textContent = "Last Win";
+	winnings_number.textContent = "$" + data.last_win;
 }
 
 spin_button.addEventListener("click", doSpin);
@@ -163,7 +165,7 @@ reset_balance.addEventListener("click", async () => {
 
 	player_alert.style.display = "none"
 	player_balance = data
-	balance.textContent = "Balance: $" + data;
+	balance.textContent = "$" + data;
 });
 
 async function doSpin() {
@@ -191,7 +193,7 @@ async function doSpin() {
 			change_spin_state("SPINNING");
 
 			player_balance = data.spin_balance
-			balance.textContent = "Balance: $" + data.spin_balance;
+			balance.textContent = "$" + data.spin_balance;
 
 			spin_result = data.screen;
 			for (const reel of reels) reel.steps = 0
@@ -216,7 +218,8 @@ function count_up_winnings() {
 		duration = Math.floor(COUNT_UP_MS / endValue);
 	let counter = setInterval(function () {
 		startValue += 1;
-		winnings.textContent = "Winnings: $" + startValue;
+		winnings.textContent = "Winnings";
+		winnings_number.textContent = "$" + startValue;
 		if (startValue >= endValue) {
 			clearInterval(counter);
 		}
@@ -228,11 +231,12 @@ function display_wins() {
 	if (spin_data.winnings > 0) {
 		count_up_winnings();
 	} else {
-		winnings.textContent = "Last Win: $" + spin_data.last_win;
+		winnings.textContent = "Last Win";
+		winnings_number.textContent = "$" + spin_data.last_win;
 	}
 
 	player_balance = spin_data.balance
-	balance.textContent = "Balance: $" + spin_data.balance;
+	balance.textContent = "$" + spin_data.balance;
 }
 
 function clear_wins() {
