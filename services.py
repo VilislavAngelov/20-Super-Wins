@@ -61,7 +61,7 @@ class CasinoService:
         player.pay_bet()
         spin_balance = player.balance
         result = self.machine.spin()
-        winnings = result.winnings * player.bet_size // self.machine.BASE_BET
+        winnings = int(result.payout * player.bet_size)
         player.collect_wins(winnings)
         player.screen = result.screen
         

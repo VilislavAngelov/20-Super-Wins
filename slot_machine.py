@@ -4,13 +4,13 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class SpinResult:
     screen: list[list[str]]
-    winnings: int
+    payout: float
     wins: list[object]
 
 
 class SlotMachine:
 
-    lines_payouts = {5 : 50, 4 : 10, 3 : 5}
+    lines_payouts = {5 : 5, 4 : 1, 3 : 0.5}
     symbols_multiplier = {
         "🍋": 1,
         "🍒": 1,
@@ -20,9 +20,8 @@ class SlotMachine:
         "👑": 4,
         "🃏": 10
         }
-    BASE_BET = 10
     SCATTER_SYMBOL = "⭐"
-    SCATTER_PAYOUT = 150
+    SCATTER_PAYOUT = 15
     PAYLINES = [   
         ((0,0), (1,0), (2,0), (3,0), (4,0)),
         ((0,1), (1,1), (2,1), (3,1), (4,1)),
@@ -63,14 +62,14 @@ class SlotMachine:
 
 
     def _check_lines(self, screen):
-        winnings = 0
+        total_payout = 0
         wins = []
         for index, payline in enumerate(self.PAYLINES):
 
             symbols = [screen[reel][row] for reel, row in payline]
             matches, target, payout = self._score_line(symbols)
             if matches >= 3:
-                    winnings += payout      
+                    total_payout += payout      
                     win = {
                         "line": index,
                         "cells": payline[:matches],
@@ -80,7 +79,7 @@ class SlotMachine:
                     wins.append(win) 
 
 
-        return (wins, winnings)
+        return (wins, total_payout)
 
     def _check_scatters(self, screen):
         # Flatten the 5x3 screen into one list of 15 items
@@ -114,10 +113,10 @@ class SlotMachine:
 
                 screen.append(reel)
 
-            wins, winnings = self._check_lines(screen)
-            winnings += self._check_scatters(screen)
+            wins, payout = self._check_lines(screen)
+            payout += self._check_scatters(screen)
 
-            return SpinResult(screen=screen, winnings=winnings, wins=wins)
+            return SpinResult(screen=screen, payout=payout, wins=wins)
 
 
     def _score_line(self, symbols):
