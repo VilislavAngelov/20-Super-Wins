@@ -8,11 +8,14 @@ from player import PlayerError
 from db import get_session
 from services import CasinoService
 from typing import Annotated
+from routes import roulette
 
 app = FastAPI()
 machine = SlotMachine()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+app.include_router(roulette.router)
 
 templates = Jinja2Templates(directory="templates")
 
