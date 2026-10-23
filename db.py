@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from config import DB_URL
 
-engine = create_engine('postgresql+psycopg://vili@/casino', echo=True)
+engine = create_engine(DB_URL)
 
 SessionLocal = sessionmaker(bind=engine)
 
