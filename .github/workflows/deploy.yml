@@ -1,0 +1,14 @@
+name: Deploy
+
+on:
+  push:
+    branches: [20-super-wins]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - run: cd ~/20-Super-Wins && git pull && docker compose up -d --build
