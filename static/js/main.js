@@ -7,9 +7,9 @@ const strips = document.querySelectorAll(".strip");
 const reset_balance = document.getElementById("reset-balance");
 const player_alert = document.getElementById("player-alert")
 const SYMBOLS = ["🍋", "🍒", "🍊", "🍉", "🍇", "👑", "🃏", "⭐"];
-const SYMBOL_HEIGHT = 100
-const SPEED = 1
-const OVERSHOOT = 30
+const SYMBOL_HEIGHT = 1
+const SPEED = 0.01 
+const OVERSHOOT = 0.3
 const BOUNCE_MS = 120
 const FIRST = 2
 const GAP = 3
@@ -46,7 +46,7 @@ function random_symbol() {
 }
 
 function draw(reel) {
-	reel.strip.style.transform = `translateY(${reel.y - SYMBOL_HEIGHT}px)`;
+	reel.strip.style.transform = `translateY(calc(${reel.y - SYMBOL_HEIGHT} * var(--symbol-h)))`;
 }
 
 function shiftDown(reel) {
@@ -276,7 +276,7 @@ function change_spin_state(new_state) {
 	stop_button.disabled = new_state !== "SPINNING"
 	reset_balance.disabled = new_state !== "IDLE"
 	spin_button.style.display = new_state === "IDLE" ? "block" : "none"
-	stop_button.style.display = new_state === "SPINNING" ? "block" : "none"
+	stop_button.style.display = new_state === "SPINNING" || new_state === "WAITING" ? "block" : "none"
 }
 
 function stop_spin() {

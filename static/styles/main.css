@@ -1,9 +1,16 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 :root {
     --symbol-h: 100px;
 }
 
 body {
     background-color: black;
+    height: 100vh;
 }
 
 #screen {
@@ -12,6 +19,7 @@ body {
 
 .game {
     grid-area: b;
+    height: fit-content;
 }
 
 .symbol {
@@ -32,25 +40,25 @@ body {
 }
 
 .container{
-    width: fit-content;
+    width: min(100%, 900px);
     margin: 0 auto;
-    padding: 50px;
+    height: 100vh;
     display: grid;
-    grid-auto-rows: 100px;
-    grid-template-columns: repeat(6, 150px);
+    gap: 20px;
+    grid-template-columns: 9fr 1fr;
+    grid-auto-rows: min-content;
     grid-template-areas:
-    "a a a a a ."
-    "b b b b b c"
-    "b b b b b c"
-    "b b b b b c"
-    "d d d d d ."
-    "d d d d d .";
+    "a ."
+    "b c"
+    "d .";
+    align-content: center;
 }
 
 .title {
     color: white;
     text-align: center;
     grid-area: a;
+    align-self: end;
 }
 
 #spin-button {
@@ -62,6 +70,7 @@ body {
     outline: none;
     border: none;
     align-self: center;
+    margin: 0 auto;
 }
 
 #stop-button {
@@ -74,27 +83,24 @@ body {
     border: none;
     display: none;
     align-self: center;
-}
-
-.player-bar {
-    display: flex;
-    gap: 20px;
+    margin: 0 auto;
 }
 
 #bet-select {
     display: flex;
     gap: 10px;
-    width: 100%;
+    margin: 0 auto;
     justify-content: space-between;
 }
 .bet-amount {
     font-size: 22px;
     font-weight: 500;
-    padding: 20px 30px;
+    padding: 15px 20px;
     background: none;
     color: white;
     border-radius: 12px;
-    border: 3px solid white
+    border: 3px solid white;
+    flex: 1;
 }
 
 .reel {
@@ -120,11 +126,125 @@ body {
 }
 
 .notification-bar{
-    height: 60px;
+    height: 20px;
+    width: 100%;
+    grid-area: a;
 }
 
-.controls {
-    grid-area: d;
+#bet-select {
+    width: 100%;
     display: flex;
-    flex-direction: column;
+    grid-area: b;
+}
+
+#balance {
+    grid-area: c;
+}
+
+#winnings {
+    grid-area: d;
+}
+
+#win-number, #win-label, #balance {
+    text-align: center;
+}
+
+.player-bar {
+    height: fit-content;
+    grid-area: d;
+    align-self: start;
+    display: grid;
+    grid-template-columns: 15% 70% 15%;
+    grid-template-areas:
+    "a a a"
+    "c b d";
+    gap: 10px;
+}
+
+@media (orientation: portrait) {
+
+    :root {
+        --symbol-h: 60px;
+    }
+
+    body {
+        width: 100%;
+        padding: 0;
+    }
+
+    #balance, #winnings {
+        font-size: 22px;
+    }
+
+    .bet-amount {
+        font-size: 18px;
+        flex: 1;
+        padding: 10px 4px;
+    }
+
+    .reel {
+        width: 20%;
+    } 
+
+    #player-alert{
+        font-size: 12px;
+    }
+
+    .container {
+        width: 100%;
+        padding: 10px;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+        "a"
+        "b"
+        "d"
+        "c";
+    }
+    .symbol {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 40px;
+        height: var(--symbol-h);
+    }
+
+    .title {
+        font-size: 28px;
+    }
+
+    .player-bar {
+        height: fit-content;
+        grid-area: d;
+        gap: 20px;
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        grid-template-areas:
+        "c a d"
+        "b b b"
+    }
+
+    .notification-bar{
+        height: 20px;
+        grid-area: a;
+    }
+
+    #bet-select {
+        grid-area: b;
+        gap: 6px;
+    }
+
+    #balance {
+        grid-area: c;
+        width: auto;
+    }
+
+    #winnings {
+        grid-area: d;
+        width: auto;
+    }
+
+    #spin-button, #stop-button {
+        justify-self: center;
+        margin-top: 30px
+    }
 }

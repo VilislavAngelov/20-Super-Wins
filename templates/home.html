@@ -26,30 +26,26 @@
         </div>
     <button id="spin-button" type="button" ><img height="100" width="100" src="{{ url_for('static', path='img/spin-start.svg') }}" alt="spin button"></button>
     <button id="stop-button" type="button" ><img height="100" width="100" src="{{ url_for('static', path='img/spin-stop.svg') }}" alt="stop button"></button>
-        <div class="controls">
+        <div class="player-bar">
             <div class="notification-bar">
                 <p id="player-alert"></p>
             </div>
-            <div class="player-bar">
-                <div id="balance">
-                    <span>Balance</span>
-                    <span id="balance-number"></span>
-                </div>
-                <div id="bet-select">
-                    <button class="bet-amount" type="button" data-bet="10">$10</button>
-                    <button class="bet-amount" type="button" data-bet="20">$20</button>
-                    <button class="bet-amount" type="button" data-bet="40">$40</button>
-                    <button class="bet-amount" type="button" data-bet="80">$80</button>
-                    <button class="bet-amount" type="button" data-bet="120">$120</button>
-                </div>
-                <div id="winnings">
-                    <span id="win-label">Winnings</span>
-                    <span id="win-number"></span>
-                </div>
-
+            <div id="balance">
+                <span>Balance</span>
+                <span id="balance-number"></span>
+            </div>
+            <div id="bet-select">
+                <button class="bet-amount" type="button" data-bet="10">$10</button>
+                <button class="bet-amount" type="button" data-bet="20">$20</button>
+                <button class="bet-amount" type="button" data-bet="40">$40</button>
+                <button class="bet-amount" type="button" data-bet="80">$80</button>
+                <button class="bet-amount" type="button" data-bet="120">$120</button>
+            </div>
+            <div id="winnings">
+                <span id="win-label">Winnings</span>
+                <span id="win-number"></span>
             </div>
         </div>
-        
     </div>
     <button id="reset-balance" type="button">Reset Balance</button>
     <script src="{{ url_for('static', path='js/main.js') }}"></script>
