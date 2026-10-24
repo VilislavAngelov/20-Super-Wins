@@ -8,4 +8,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0"]
+CMD ["sh", "-c", "python create_tables.py && uvicorn main:app --host 0.0.0.0"]
