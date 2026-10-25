@@ -62,7 +62,6 @@ body {
 }
 
 #spin-button {
-    grid-area: c;
     width: 100px;
     height: 100px;
     background-color: transparent;
@@ -74,7 +73,6 @@ body {
 }
 
 #stop-button {
-    grid-area: c;
     width: 100px;
     height: 100px;
     background-color: transparent;
@@ -161,6 +159,28 @@ body {
     gap: 10px;
 }
 
+.control-buttons {
+    display: flex;
+    flex-direction: column;
+    grid-area: c;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#receive-button, #double-button {
+    background: none;
+    border: 4px solid white;
+    height: 80px;
+    width: 80px;
+    border-radius: 100%;
+}
+
+#double-button {
+    color: white;
+    font-size: 30px;
+    font-weight: 600;
+}
+
 @media (orientation: portrait) {
 
     :root {
@@ -179,7 +199,7 @@ body {
     .bet-amount {
         font-size: 18px;
         flex: 1;
-        padding: 10px 4px;
+        padding: 14px;
     }
 
     .reel {
@@ -187,7 +207,7 @@ body {
     } 
 
     #player-alert{
-        font-size: 14px;
+        font-size: 18px;
     }
 
     .container {
@@ -204,12 +224,12 @@ body {
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: 40px;
+        font-size: 50px;
         height: var(--symbol-h);
     }
 
     .title {
-        font-size: 28px;
+        font-size: 32px;
     }
 
     .player-bar {
@@ -245,6 +265,25 @@ body {
 
     #spin-button, #stop-button {
         justify-self: center;
-        margin-top: 30px
+    }
+
+    .control-buttons {
+        flex-direction: row;
+        grid-area: c;
+        padding: 20px;
+    }
+
+    #receive-button, #double-button {
+        background: none;
+        border: 4px solid white;
+        height: 80px;
+        width: 80px;
+        border-radius: 100%;
+    }
+
+    #double-button {
+        color: white;
+        font-size: 30px;
+        font-weight: 600;
     }
 }

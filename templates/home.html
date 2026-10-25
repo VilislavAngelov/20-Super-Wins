@@ -24,8 +24,12 @@
                 {% endfor %}
             </div>
         </div>
-    <button id="spin-button" type="button" ><img height="100" width="100" src="{{ url_for('static', path='img/spin-start.svg') }}" alt="spin button"></button>
-    <button id="stop-button" type="button" ><img height="100" width="100" src="{{ url_for('static', path='img/spin-stop.svg') }}" alt="stop button"></button>
+    <div class="control-buttons">
+        <button id="double-button" type="button" ><span>x2</span></button>
+        <button id="spin-button" type="button" ><img height="100" width="100" src="{{ url_for('static', path='img/spin-start.svg') }}" alt="spin button"></button>
+        <button id="stop-button" type="button" ><img height="100" width="100" src="{{ url_for('static', path='img/spin-stop.svg') }}" alt="stop button"></button>
+        <button id="receive-button" type="button" ><img height="40" width="40" src="{{ url_for('static', path='img/receive.png') }}" alt="receive win button"></button>
+    </div>
         <div class="player-bar">
             <div class="notification-bar">
                 <p id="player-alert"></p>
