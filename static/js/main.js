@@ -1,12 +1,12 @@
-const spin_button = document.getElementById("spin-button");
-const stop_button = document.getElementById("stop-button");
-const balance = document.getElementById("balance-number");
-const winnings = document.getElementById("win-label");
-const winnings_number = document.getElementById("win-number");
-const strips = document.querySelectorAll(".strip");
-const reset_balance = document.getElementById("reset-balance");
+const spin_button = document.getElementById("spin-button")
+const stop_button = document.getElementById("stop-button")
+const balance = document.getElementById("balance-number")
+const winnings = document.getElementById("win-label")
+const winnings_number = document.getElementById("win-number")
+const strips = document.querySelectorAll(".strip")
+const reset_balance = document.getElementById("reset-balance")
 const player_alert = document.getElementById("player-alert")
-const SYMBOLS = ["🍋", "🍒", "🍊", "🍉", "🍇", "👑", "🃏", "⭐"];
+const SYMBOLS = ["🍋", "🍒", "🍊", "🍉", "🍇", "👑", "🃏", "⭐"]
 const SYMBOL_HEIGHT = 1
 const SPEED = 0.01 
 const OVERSHOOT = 0.3
@@ -15,17 +15,34 @@ const FIRST = 2
 const GAP = 3
 const COUNT_UP_MS = 1000
 const reels = [];
+const audio_context = new AudioContext()
 
-let bet_buttons = document.getElementsByClassName("bet-amount");
-let spin_result = null;
-let spin_data = null;
-let stopping = false;
-let landed = 0;
-let show_index = 0;
-let win_timer = null;
-let spin_state = "IDLE";
+let bet_buttons = document.getElementsByClassName("bet-amount")
+let spin_result = null
+let spin_data = null
+let stopping = false
+let stopping_sound = false
+let landed = 0
+let show_index = 0
+let win_timer = null
+let spin_state = "IDLE"
 let player_balance
 let player_bet
+let landSound = null
+loadSound("/static/sounds/land.wav").then(buffer => landSound = buffer)
+
+async function loadSound(url) {
+	const response = await fetch(url);
+	const data = await response.arrayBuffer();
+	return await audio_context.decodeAudioData(data);
+}
+
+function play(sound) {
+	const source = audio_context.createBufferSource();
+	source.buffer = sound;
+	source.connect(audio_context.destination);
+	source.start();
+}
 
 strips.forEach((strip, index) => {
 	reels.push({
@@ -37,7 +54,7 @@ strips.forEach((strip, index) => {
 		queue: [],
 		steps: 0,
 		bounceStart: 0,
-		landing_sound: new Audio("/static/sounds/land.wav"),
+		stopped: false
 	});
 });
 
@@ -84,8 +101,13 @@ function update(reel, now, dt) {
 	}
 	if (reel.state === "OVERSHOOT" && reel.y >= OVERSHOOT) {
 		reel.y = OVERSHOOT
-		reel.landing_sound.currentTime = 0;
-		reel.landing_sound.play().catch(() => {});
+		if (!reel.stopped){
+			play(landSound)
+		} else if (!stopping_sound) {
+			play(landSound)
+			stopping_sound = true
+		}
+
 		reel.state = "BOUNCE"
 		reel.bounceStart = now
 	}
@@ -115,6 +137,7 @@ function startLanding(reel) {
 	const column = spin_result[reel.index]
 	reel.queue = [column[2], column[1], column[0], random_symbol()]
 	reel.state = "LAND"
+	reel.stopped = stopping
 }
 
 async function loadState() {
@@ -169,12 +192,14 @@ reset_balance.addEventListener("click", async () => {
 });
 
 async function doSpin() {
+	audio_context.resume()
 	if (player_balance < player_bet) {
 		player_alert.textContent = "Not enough balance" 
 		player_alert.style.display = "block"
 		return
 	}
 	if (spin_state == "IDLE") {
+		stopping_sound = false
 		player_alert.style.display = "none"
 		spin_result = null;
 		stopping = false;
