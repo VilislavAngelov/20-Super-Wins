@@ -1,5 +1,7 @@
 const spin_button = document.getElementById("spin-button")
 const stop_button = document.getElementById("stop-button")
+const double_button = document.getElementById("double-button")
+const receive_button = document.getElementById("receive-button")
 const balance = document.getElementById("balance-number")
 const winnings = document.getElementById("win-label")
 const winnings_number = document.getElementById("win-number")
@@ -119,9 +121,11 @@ function update(reel, now, dt) {
 
 			landed++;
 			if (landed === reels.length) {
+				console.log(spin_state)
 				display_wins();
 
 				if (spin_data.wins.length > 0) {
+					change_spin_state("DOUBLE")
 					win_timer = setInterval(show_next_win, 300);
 				}
 			}
@@ -198,7 +202,7 @@ async function doSpin() {
 		player_alert.style.display = "block"
 		return
 	}
-	if (spin_state == "IDLE") {
+	if (spin_state == "IDLE" || spin_state == "DOUBLE") {
 		stopping_sound = false
 		player_alert.style.display = "none"
 		spin_result = null;
@@ -297,11 +301,20 @@ function show_next_win() {
 function change_spin_state(new_state) {
 	spin_state = new_state
 
-	spin_button.disabled = new_state !== "IDLE"
+	spin_button.disabled = new_state !== "IDLE" && new_state !== "DOUBLE"
 	stop_button.disabled = new_state !== "SPINNING"
 	reset_balance.disabled = new_state !== "IDLE"
-	spin_button.style.display = new_state === "IDLE" ? "block" : "none"
+	spin_button.style.display = new_state === "IDLE" || new_state === "DOUBLE" ? ""  : "none"
 	stop_button.style.display = new_state === "SPINNING" || new_state === "WAITING" ? "block" : "none"
+
+	receive_button.style.display = new_state === "DOUBLE" ? "" : "none";
+	receive_button.disabled = new_state !== "DOUBLE"
+
+	double_button.style.display = new_state === "DOUBLE" ? "" : "none";
+	double_button.disabled = new_state !== "DOUBLE"
+
+
+
 }
 
 function stop_spin() {

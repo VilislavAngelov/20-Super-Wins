@@ -7,6 +7,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - default
+      - angelops
 
   db:
     image: postgres:18
@@ -23,14 +26,10 @@ services:
       interval: 5s
       retries: 5
 
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    restart: always
-    command: tunnel run
-    environment:
-      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
-    depends_on:
-      - casino
 
 volumes:
   pgdata:
+
+networks:
+  angelops:
+    external: true

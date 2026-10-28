@@ -11,4 +11,4 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-      - run: cd ~/20-Super-Wins && git pull && docker compose up -d --build
+      - run: cd ~/20-Super-Wins && git pull && docker compose up -d --build --remove-orphans

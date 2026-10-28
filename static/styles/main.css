@@ -61,7 +61,7 @@ body {
     align-self: end;
 }
 
-#spin-button {
+#stop-button, #spin-button {
     width: 100px;
     height: 100px;
     background-color: transparent;
@@ -69,19 +69,11 @@ body {
     outline: none;
     border: none;
     align-self: center;
-    margin: 0 auto;
+    margin: 20px 0;
 }
 
 #stop-button {
-    width: 100px;
-    height: 100px;
-    background-color: transparent;
-    cursor: pointer;
-    outline: none;
-    border: none;
     display: none;
-    align-self: center;
-    margin: 0 auto;
 }
 
 #bet-select {
@@ -163,7 +155,7 @@ body {
     display: flex;
     flex-direction: column;
     grid-area: c;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
 }
 
@@ -265,6 +257,7 @@ body {
 
     #spin-button, #stop-button {
         justify-self: center;
+        margin: 0 20px;
     }
 
     .control-buttons {
